@@ -102,7 +102,8 @@ namespace NeoCortexApiSample
                     Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
                 }
                 else
-                    Debug.WriteLine("Nothing predicted :( ");
+                    //Debug.WriteLine("Nothing predicted :( ");
+                    Debug.WriteLine(" Prediction Unsuccessful :( ");
             }
 
             Debug.WriteLine("------------------------------");
