@@ -61,9 +61,14 @@ namespace NeoCortexApiSample
             // These list are used to see how the prediction works.
             // Predictor is traversing the list element by element. 
             // By providing more elements to the prediction, the predictor delivers more precise result.
+           // var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
+            //var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
+            //var list3 = new double[] { 'c', 'i' };
+
             var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
-            var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
+            var list2 = new double[] { 'S', 'E', 'C', 'O', 'N' ,'D'};
             var list3 = new double[] { 'c', 'i' };
+
 
 
             predictor.Reset();
