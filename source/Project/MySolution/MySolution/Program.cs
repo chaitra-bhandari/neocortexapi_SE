@@ -8,6 +8,8 @@ using System.Reflection.Metadata;
 using System.Text;
 using static NeoCortexApiSample.MultiSequenceLearning;
 using static System.Net.Mime.MediaTypeNames;
+using System.IO;
+
 
 namespace NeoCortexApiSample
 {
@@ -110,7 +112,7 @@ namespace NeoCortexApiSample
         }
 
         //function to read the file and return  char array.
-        static List<char> ReadFileAndConvertToCharList(string filePath)
+        /*static List<char> ReadFileAndConvertToCharList(string filePath)
         {
             List<char> charList = new List<char>();
 
@@ -149,7 +151,62 @@ namespace NeoCortexApiSample
         }
     }
 
+}*/
+        static List<char> ReadFileAndConvertToCharList(string filePath, string outputFilePath)
+        {
+            List<char> charList = new List<char>();
+
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    Console.WriteLine("Error: File does not exist.");
+                    return charList;
+                }
+
+                // Read all text from the file
+                string fileContent = File.ReadAllText(filePath);
+
+                //Remove \r, \n, \t, and regular spaces
+                string cleanedContent = fileContent.Replace("\r", "").Replace("\n", "").Replace("\t", "").Replace(" ", "");
+
+                //Write the cleaned content to the output file
+                File.WriteAllText(outputFilePath, cleanedContent, Encoding.UTF8);
+
+                Console.WriteLine("The spaces have been removed successfully.");
+
+                //Convert the cleaned content to char array
+                char[] charArray = cleanedContent.ToCharArray();
+
+                //Convert the char array to a list
+                charList.AddRange(charArray);
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("Error: File not found - " + ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine("Error: Unauthorized access - " + ex.Message);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine("Error: Input/Output error - " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+
+            return charList;
+        }
+    }
 }
+
+
+       
+
+    
 
 
 
