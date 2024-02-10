@@ -1,6 +1,7 @@
 ﻿using NeoCortexApi;
 using NeoCortexApi.Encoders;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -61,19 +62,34 @@ namespace NeoCortexApiSample
             // These list are used to see how the prediction works.
             // Predictor is traversing the list element by element. 
             // By providing more elements to the prediction, the predictor delivers more precise result.
-            var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
-            var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
-            var list3 = new double[] { 'c', 'i' };
+            List<double> list1 = new List<double>();
 
+        
+            string filePath1 = @"testingdata.txt";
+
+            List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
+            foreach (char character in charList)
+            {
+                double ascii = (double)character;
+                list1.Add(ascii);
+
+            }
+            //Converting the list of doubles into a var variable
+            double[] doubleArray = list1.ToArray();
+            Console.WriteLine(doubleArray);
+
+            //var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
+            //var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
+            //var list3 = new double[] { 'c', 'i' };
 
             predictor.Reset();
-            PredictNextElement(predictor, list1);
+            PredictNextElement(predictor, doubleArray);
 
-            predictor.Reset();
-            PredictNextElement(predictor, list2);
+            //predictor.Reset();
+            //PredictNextElement(predictor, list2);
 
-            predictor.Reset();
-            PredictNextElement(predictor, list3);
+            //predictor.Reset();
+            //PredictNextElement(predictor, list3);
         }
 
         private static void PredictNextElement(Predictor predictor, double[] list)
@@ -149,6 +165,15 @@ namespace NeoCortexApiSample
     }
 
 }
+
+
+
+
+
+
+
+
+
 
 
 
