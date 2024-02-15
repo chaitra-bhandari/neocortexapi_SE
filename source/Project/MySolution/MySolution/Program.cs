@@ -64,7 +64,7 @@ namespace NeoCortexApiSample
             // By providing more elements to the prediction, the predictor delivers more precise result.
             List<double> list1 = new List<double>();
 
-        
+            // Relative file path to testing file
             string filePath1 = @"testingdata.txt";
 
             List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
@@ -74,22 +74,15 @@ namespace NeoCortexApiSample
                 list1.Add(ascii);
 
             }
+
             //Converting the list of doubles into a var variable
             double[] doubleArray = list1.ToArray();
             Console.WriteLine(doubleArray);
 
-            //var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
-            //var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
-            //var list3 = new double[] { 'c', 'i' };
-
             predictor.Reset();
             PredictNextElement(predictor, doubleArray);
 
-            //predictor.Reset();
-            //PredictNextElement(predictor, list2);
-
-            //predictor.Reset();
-            //PredictNextElement(predictor, list3);
+          
         }
 
         private static void PredictNextElement(Predictor predictor, double[] list)
