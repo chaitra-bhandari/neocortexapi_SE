@@ -40,6 +40,7 @@ namespace NeoCortexApiSample
 
             //Call the function to read the file and convert to char array.
             List<char> charList = ReadFileAndConvertToCharList(filePath);
+            List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
 
             foreach (char character in charList)
             {
@@ -106,7 +107,6 @@ namespace NeoCortexApiSample
                     Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
                 }
                 else
-                    //Debug.WriteLine("Nothing predicted :( ");
                     Debug.WriteLine(" Prediction Unsuccessful :( ");
             }
 
