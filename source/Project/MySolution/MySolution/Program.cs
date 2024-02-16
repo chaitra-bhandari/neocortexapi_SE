@@ -9,6 +9,7 @@ using System.Text;
 using static NeoCortexApiSample.MultiSequenceLearning;
 using static System.Net.Mime.MediaTypeNames;
 using System.IO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace NeoCortexApiSample
@@ -35,6 +36,7 @@ namespace NeoCortexApiSample
 
             //path to the input text file.
             string filePath = @"filename.txt";
+            string filepath1 = @"filename.doc";
 
             //Call the function to read the file and convert to char array.
             List<char> charList = ReadFileAndConvertToCharList(filePath);
@@ -152,6 +154,7 @@ namespace NeoCortexApiSample
     }
 
 }*/
+        // Modified function to read the file and return  char array.
         static List<char> ReadFileAndConvertToCharList(string filePath, string outputFilePath)
         {
             List<char> charList = new List<char>();
