@@ -175,9 +175,20 @@ namespace NeoCortexApiSample
             List<double> asciiSequence = GetAsciiSequenceFromFile("filename.txt");
 
             Console.WriteLine("ASCII Sequence:");
-            foreach (int asciiCode in asciiSequence)
+            foreach (int asciiCod in asciiSequence)
+                /*{
+                    Console.Write(asciiCode + " ");
+                }*/
+                for (int i = 32; i < 127; i++)
+                {
+                    Console.Write((char)i + " ");
+                }
+
+            // Or, if you want to store the values in an array
+            char[] asciiCode = new char[95];
+            for (int i = 32; i < 127; i++)
             {
-                Console.Write(asciiCode + " ");
+                asciiCode[i - 32] = (char)i;
             }
 
             Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>> { { "S1", asciiSequence } };
