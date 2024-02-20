@@ -68,7 +68,7 @@ namespace NeoCortexApiSample
             string filePath1 = @"testingdata.txt";
 
             List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
-            foreach (char character in charList)
+            foreach (char character in charList1)
             {
                 double ascii = (double)character;
                 list1.Add(ascii);
@@ -124,7 +124,7 @@ namespace NeoCortexApiSample
 
             try
             {
-                // Read all text from the file
+                // 9Read all text from the file
                 string fileContent = File.ReadAllText(filePath);
 
                 //Remove \r, \n, \t, and regular spaces
@@ -132,20 +132,37 @@ namespace NeoCortexApiSample
 
                 //Join all characters into a single string
                 string joinedString = string.Join("", cleanedContent.ToCharArray());
+                if (filePath == @"filename.txt")
 
                 //Write the joined string to the output file
-                File.WriteAllText(@"outputFilePath", joinedString, Encoding.UTF8);
+                {
+                    File.WriteAllText(@"outputFilePath", joinedString, Encoding.UTF8);
+
+                    Console.WriteLine("The spaces is removed successfully.");
+
+                    //Read the modified file
+                    string fileContent1 = File.ReadAllText(@"outputFilePath");
+
+                    //Convert the string to a char array
+                    char[] charArray = fileContent1.ToCharArray();
+
+                    //Convert the char array to a list
+                    charList.AddRange(charArray);
+                }
+                else
+                    File.WriteAllText(@"outputFile", joinedString, Encoding.UTF8);
 
                 Console.WriteLine("The spaces is removed successfully.");
 
                 //Read the modified file
-                string fileContent1 = File.ReadAllText(@"outputFilePath");
+                string fileContent2 = File.ReadAllText(@"outputFilePath");
 
                 //Convert the string to a char array
-                char[] charArray = fileContent1.ToCharArray();
+                char[] charArray1 = fileContent2.ToCharArray();
 
                 //Convert the char array to a list
-                charList.AddRange(charArray);
+                charList.AddRange(charArray1);
+
             }
             catch (Exception ex)
             {
