@@ -197,12 +197,16 @@ namespace NeoCortexApiSample
         {
             try
             {
+                // Read the content of a file
                 string fileContent = File.ReadAllText(filePath);
+                // Remove spaces, tabs, carriage returns, and line feeds
                 string cleanedContent = fileContent.Replace("\r", "").Replace("\n", "").Replace("\t", "").Replace(" ", "");
+                // Convert the cleaned content to a single string
                 string joinedString = string.Join("", cleanedContent.ToCharArray());
                 File.WriteAllText(@"outputFilePath", joinedString);
 
                 Console.WriteLine("Spaces removed successfully.");
+
 
                 string fileContent1 = File.ReadAllText(@"outputFilePath");
                 return fileContent1.Select(character => (double)character).ToList();
