@@ -203,8 +203,9 @@ namespace NeoCortexApiSample
                 string cleanedContent = fileContent.Replace("\r", "").Replace("\n", "").Replace("\t", "").Replace(" ", "");
                 // Convert the cleaned content to a single string
                 string joinedString = string.Join("", cleanedContent.ToCharArray());
+                // Write the cleaned content to a new file
                 File.WriteAllText(@"outputFilePath", joinedString);
-
+                // Display a success message
                 Console.WriteLine("Spaces removed successfully.");
 
 
