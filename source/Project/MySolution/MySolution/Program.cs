@@ -49,6 +49,15 @@ namespace NeoCortexApiSample
                 asciiSequence.Add(asciiValue);
 
             }
+
+            foreach (char character in charList1)
+            {
+                double asciiValue1 = (double)character;
+
+                asciiSequence.Add(asciiValue1);
+
+            }
+
             Console.WriteLine("ASCII Sequence:");
 
             foreach (int asciiCode in asciiSequence)
