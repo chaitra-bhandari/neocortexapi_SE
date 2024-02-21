@@ -34,7 +34,7 @@ namespace NeoCortexApiSample
 
             Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
 
-            //path to the input text file.
+            //path to the input text and document files.
             string filePath = @"filename.txt";
             string filepath1 = @"filename.doc";
 
