@@ -28,7 +28,7 @@ namespace NeoCortexApiSample
         /// </summary>
         private static void RunMultiSequenceLearningExperiment()
         {
-            List<double> asciiSequence = new List<double>();
+            List<double> inputValues = new List<double>();
 
             Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
 
@@ -42,21 +42,17 @@ namespace NeoCortexApiSample
             {
                 double asciiValue = (double)character;
 
-                asciiSequence.Add(asciiValue);
+                inputValues.Add(asciiValue);
 
             }
             Console.WriteLine("ASCII Sequence:");
 
-            foreach (int asciiCode in asciiSequence)
-            {
-                Console.Write(asciiCode + " ");
-            }
-            sequences.Add("S1", asciiSequence);
+           
 
             // Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
 
-            var predictor = experiment.Run(asciiSequence);
+            var predictor = experiment.Run(inputValues);
 
 
             // These list are used to see how the prediction works.
