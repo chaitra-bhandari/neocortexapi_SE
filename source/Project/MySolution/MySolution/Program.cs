@@ -56,7 +56,7 @@ namespace NeoCortexApiSample
             // Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
 
-            var predictor = experiment.Run(sequences);
+            var predictor = experiment.Run(asciiSequence);
 
 
             // These list are used to see how the prediction works.
