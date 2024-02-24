@@ -1,23 +1,20 @@
-﻿using NeoCortexApi;
-using NeoCortexApi.Encoders;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using NeoCortexApi;
+using NeoCortexApiSample;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection.Metadata;
 using System.Text;
-using static NeoCortexApiSample.MultiSequenceLearning;
-using static System.Net.Mime.MediaTypeNames;
+using System.Collections.Generic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+//using static NeoCortexApi.Utility.GroupBy2<R>;
 
 namespace NeoCortexApiSample
-{
-    class Program
     {
-        static void Main(string[] args)
+    class Program
         {
+        static void Main(string[] args)
+            {
             RunMultiSequenceLearningExperiment();
-        }
+            }
 
         /// <summary>
         /// This example demonstrates how to learn sequences and how to use the prediction mechanism.
@@ -27,11 +24,13 @@ namespace NeoCortexApiSample
         /// The predictor tries to predict the next element.
         /// </summary>
         private static void RunMultiSequenceLearningExperiment()
-        {
+            {
             List<double> inputValues = new List<double>();
+            //Define block size
+            int block_size = 8;
 
-            Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
-
+            //Define batch size
+            int batch_size = 4;
             //path to the input text file.
             string filePath = @"filename.txt";
 
@@ -39,62 +38,75 @@ namespace NeoCortexApiSample
             List<char> charList = ReadFileAndConvertToCharList(filePath);
 
             foreach (char character in charList)
-            {
+                {
                 double asciiValue = (double)character;
 
                 inputValues.Add(asciiValue);
 
-            }
+                }
             Console.WriteLine("ASCII Sequence:");
+            foreach (var item in inputValues)
+                {
+                Console.Write(item + " ");
+                }
 
-           
+            List<double> x = GetBatch(inputValues, block_size, batch_size);
+            Console.WriteLine($"Print x ");
+            foreach (var item in x)
+                {
+                Console.Write(item + " ");
+                }
 
             // Prototype for building the prediction engine.
-            MultiSequenceLearning experiment = new MultiSequenceLearning();
 
-            var predictor = experiment.Run(inputValues);
+            for (int i = 1; i < x.Count; i += 7)
+                {
+
+                List<double> batch = x.Take(7).ToList();
+                foreach (var item in batch)
+                    {
+                    Console.Write(item + " ");
+                    }
+
+                MultiSequenceLearning experiment = new MultiSequenceLearning();
+
+                var predictor = experiment.Run(batch);
 
 
-            // These list are used to see how the prediction works.
-            // Predictor is traversing the list element by element. 
-            // By providing more elements to the prediction, the predictor delivers more precise result.
-            List<double> list1 = new List<double>();
 
-            // Relative file path to testing file
-            string filePath1 = @"testingdata.txt";
+                // These list are used to see how the prediction works.
+                // Predictor is traversing the list element by element. 
+                // By providing more elements to the prediction, the predictor delivers more precise result.
+                // var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
+                //var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
+                var list3 = new double[] { 'y', 'o', 'u' };
 
-            List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
-            foreach (char character in charList1)
-            {
-                double ascii = (double)character;
-                list1.Add(ascii);
 
+                //predictor.Reset();
+                //PredictNextElement(predictor, list1);
+
+                //predictor.Reset();
+                //PredictNextElement(predictor, list2);
+
+                predictor.Reset();
+                PredictNextElement(predictor, list3);
+                }
             }
 
-            //Converting the list of doubles into a var variable
-            double[] doubleArray = list1.ToArray();
-            Console.WriteLine(doubleArray);
-
-            predictor.Reset();
-            PredictNextElement(predictor, doubleArray);
-
-          
-        }
-
         private static void PredictNextElement(Predictor predictor, double[] list)
-        {
+            {
             Debug.WriteLine("------------------------------");
 
             foreach (var item in list)
-            {
+                {
                 var res = predictor.Predict(item);
 
                 if (res.Count > 0)
-                {
-                    foreach (var pred in res)
                     {
+                    foreach (var pred in res)
+                        {
                         Debug.WriteLine($"{pred.PredictedInput} - {pred.Similarity}");
-                    }
+                        }
 
                     var tokens = res.First().PredictedInput.Split('_');
 
@@ -105,22 +117,21 @@ namespace NeoCortexApiSample
                     var tokens3 = tokens2.Last();
 
                     Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
-                }
+                    }
                 else
                     Debug.WriteLine("Nothing predicted :( ");
-            }
+                }
 
             Debug.WriteLine("------------------------------");
-        }
-
+            }
         //function to read the file and return  char array.
-        static List<char> ReadFileAndConvertToCharList(string filePath)
-        {
+        public static List<char> ReadFileAndConvertToCharList(string filePath)
+            {
             List<char> charList = new List<char>();
 
             try
-            {
-                // 9Read all text from the file
+                {
+                // Read all text from the file
                 string fileContent = File.ReadAllText(filePath);
 
                 //Remove \r, \n, \t, and regular spaces
@@ -128,83 +139,52 @@ namespace NeoCortexApiSample
 
                 //Join all characters into a single string
                 string joinedString = string.Join("", cleanedContent.ToCharArray());
-                if (filePath == @"filename.txt")
 
                 //Write the joined string to the output file
-                {
-                    File.WriteAllText(@"outputFilePath", joinedString, Encoding.UTF8);
-
-                    Console.WriteLine("The spaces is removed successfully.");
-
-                    //Read the modified file
-                    string fileContent1 = File.ReadAllText(@"outputFilePath");
-
-                    //Convert the string to a char array
-                    char[] charArray = fileContent1.ToCharArray();
-
-                    //Convert the char array to a list
-                    charList.AddRange(charArray);
-                }
-                else
-                    File.WriteAllText(@"outputFile", joinedString, Encoding.UTF8);
+                File.WriteAllText(@"outputFilePath", joinedString, Encoding.UTF8);
 
                 Console.WriteLine("The spaces is removed successfully.");
 
                 //Read the modified file
-                string fileContent2 = File.ReadAllText(@"outputFilePath");
+                string fileContent1 = File.ReadAllText(@"outputFilePath");
 
                 //Convert the string to a char array
-                char[] charArray1 = fileContent2.ToCharArray();
+                char[] charArray = fileContent1.ToCharArray();
 
                 //Convert the char array to a list
-                charList.AddRange(charArray1);
-
-            }
+                charList.AddRange(charArray);
+                }
             catch (Exception ex)
-            {
+                {
                 //if not file found- Handle exceptions (e.g., file not found, access denied, etc.)
                 Console.WriteLine("Error reading the file: " + ex.Message);
-            }
+                }
 
             return charList;
+            }
+
+
+        public static List<double> GetBatch(List<double> data, int block_size, int batch_size)
+            {
+            Random random = new Random();
+            int totalDataSize = data.Count;
+            Console.WriteLine($"totalDataSize: {totalDataSize}");
+            List<double> x = new List<double>();
+
+            for (int i = 0; i < batch_size; i++)
+                {
+                int startIndex = random.Next(totalDataSize - block_size);
+                for (int j = 0; j < block_size; j++)
+                    {
+                    x.Add(data[startIndex + j]);
+                    }
+                }
+
+            return x;
+            }
         }
+
     }
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
