@@ -60,11 +60,21 @@ namespace NeoCortexApiSample
 
             List<double> x = GetBatch(inputValues, block_size, batch_size);
 
-            
+            for (int i = 0; i < x.Count; i += block_size )
+                {
+                List<double> chunk = x.GetRange(i, block_size );
+
+
+
+                Console.WriteLine("Batch:");
+                foreach (var item in chunk)
+                    {
+                    Console.Write(item + " ");
+                    }
 
                 //Prototype for building the prediction engine.}
                 MultiSequenceLearning experiment = new MultiSequenceLearning();
-                var predictor = experiment.Run(x);
+                var predictor = experiment.Run(chunk);
 
 
 
@@ -86,7 +96,7 @@ namespace NeoCortexApiSample
                 predictor.Reset();
                 PredictNextElement(predictor, list1);
                 }
-            
+            }
 
         private static void PredictNextElement(Predictor predictor, double[] list)
             {
