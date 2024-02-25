@@ -59,27 +59,28 @@ namespace NeoCortexApiSample
 
             // Prototype for building the prediction engine.
 
-            for (int i = 1; i < x.Count; i += 7)
-                {
+            //for (int i = 1; i < x.Count; i += 7)
+            //    {
 
-                List<double> batch = x.Take(7).ToList();
-                foreach (var item in batch)
-                    {
-                    Console.Write(item + " ");
-                    }
+            //    List<double> batch = x.Take(7).ToList();
+            //    Console.WriteLine("Batches:");
+            //    foreach (var item in batch)
+            //        {
+            //        Console.Write(item + " ");
+            //        }
 
                 MultiSequenceLearning experiment = new MultiSequenceLearning();
 
-                var predictor = experiment.Run(batch);
+                var predictor = experiment.Run(inputValues);
 
 
 
                 // These list are used to see how the prediction works.
                 // Predictor is traversing the list element by element. 
                 // By providing more elements to the prediction, the predictor delivers more precise result.
-                // var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
+                 var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
                 //var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
-                var list3 = new double[] { 'y', 'o', 'u' };
+               // var list3 = new double[] { 'y', 'o', 'u' };
 
 
                 //predictor.Reset();
@@ -89,9 +90,9 @@ namespace NeoCortexApiSample
                 //PredictNextElement(predictor, list2);
 
                 predictor.Reset();
-                PredictNextElement(predictor, list3);
+                PredictNextElement(predictor, list1);
                 }
-            }
+            //}
 
         private static void PredictNextElement(Predictor predictor, double[] list)
             {
@@ -173,6 +174,7 @@ namespace NeoCortexApiSample
 
             for (int i = 0; i < batch_size; i++)
                 {
+                //if (totalDataSize < block_Size do padding)
                 int startIndex = random.Next(totalDataSize - block_size);
                 for (int j = 0; j < block_size; j++)
                     {

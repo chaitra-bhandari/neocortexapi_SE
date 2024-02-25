@@ -259,14 +259,16 @@ namespace NeoCortexApiSample
                             //var predictedInputValue = cls.GetPredictedInputValue(lyrOut.PredictiveCells.ToArray());
                             var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
                             Console.WriteLine($"predictedInputValues : {predictedInputValues}");
-
+                           
                             foreach (var item in predictedInputValues)
                                 {
                                 Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
                                 }
 
                             lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
+
                             Console.WriteLine($"The lastpredicted values : {lastPredictedValues}");
+
                             }
                         else
                             {
@@ -280,7 +282,8 @@ namespace NeoCortexApiSample
                     double maxPossibleAccuraccy = (double)((double)inputValues.Count() - 1) / (double)inputValues.Count() * 100.0;
 
                     double accuracy = (double)matches / (double)inputValues.Count() * 100.0;
-
+                    
+                    
                     Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {inputValues.Count()}\t {accuracy}%");
 
                     if (accuracy >= maxPossibleAccuraccy)
