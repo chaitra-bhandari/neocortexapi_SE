@@ -26,17 +26,15 @@ namespace NeoCortexApiSample
         private static void RunMultiSequenceLearningExperiment()
             {
             List<double> inputValues = new List<double>();
-            //Define block size
-            int block_size = 8;
 
-            //Define batch size
-            int batch_size = 4;
-            //path to the input text file.
+
+            //Path to the input text file.
             string filePath = @"filename.txt";
 
             //Call the function to read the file and convert to char array.
             List<char> charList = ReadFileAndConvertToCharList(filePath);
 
+            //Add asciiValue to a List 
             foreach (char character in charList)
                 {
                 double asciiValue = (double)character;
@@ -44,43 +42,39 @@ namespace NeoCortexApiSample
                 inputValues.Add(asciiValue);
 
                 }
+
+            //Print the ascii value
             Console.WriteLine("ASCII Sequence:");
             foreach (var item in inputValues)
                 {
                 Console.Write(item + " ");
                 }
 
+            //Call a method to devide the inpit values as batches
+
+            //Define block size.
+            int block_size = 8;
+
+            //Define batch size.
+            int batch_size = 4;
+
             List<double> x = GetBatch(inputValues, block_size, batch_size);
-            Console.WriteLine($"Print x ");
-            foreach (var item in x)
-                {
-                Console.Write(item + " ");
-                }
 
-            // Prototype for building the prediction engine.
+            
 
-            //for (int i = 1; i < x.Count; i += 7)
-            //    {
-
-            //    List<double> batch = x.Take(7).ToList();
-            //    Console.WriteLine("Batches:");
-            //    foreach (var item in batch)
-            //        {
-            //        Console.Write(item + " ");
-            //        }
-
+                //Prototype for building the prediction engine.}
                 MultiSequenceLearning experiment = new MultiSequenceLearning();
+                var predictor = experiment.Run(x);
 
-                var predictor = experiment.Run(inputValues);
 
 
 
                 // These list are used to see how the prediction works.
                 // Predictor is traversing the list element by element. 
                 // By providing more elements to the prediction, the predictor delivers more precise result.
-                 var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
+                var list1 = new double[] { 'T', 'r', 'a', 'i', 'n' };
                 //var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
-               // var list3 = new double[] { 'y', 'o', 'u' };
+                // var list3 = new double[] { 'y', 'o', 'u' };
 
 
                 //predictor.Reset();
@@ -92,7 +86,7 @@ namespace NeoCortexApiSample
                 predictor.Reset();
                 PredictNextElement(predictor, list1);
                 }
-            //}
+            
 
         private static void PredictNextElement(Predictor predictor, double[] list)
             {
@@ -113,11 +107,12 @@ namespace NeoCortexApiSample
 
                     var tokens2 = res.First().PredictedInput.Split('-');
 
-                    Console.WriteLine(tokens2.Last());
+                    Console.WriteLine($"token 2 ={tokens2.Last()}");
 
                     var tokens3 = tokens2.Last();
 
                     Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
+
                     }
                 else
                     Debug.WriteLine("Nothing predicted :( ");
@@ -125,7 +120,11 @@ namespace NeoCortexApiSample
 
             Debug.WriteLine("------------------------------");
             }
-        //function to read the file and return  char array.
+
+
+
+
+        //Function to read the file and return  char array.
         public static List<char> ReadFileAndConvertToCharList(string filePath)
             {
             List<char> charList = new List<char>();
@@ -164,18 +163,33 @@ namespace NeoCortexApiSample
             return charList;
             }
 
-
+        //Function to divide the input values to a set of batches
         public static List<double> GetBatch(List<double> data, int block_size, int batch_size)
             {
             Random random = new Random();
             int totalDataSize = data.Count;
+            if (totalDataSize < block_size)
+                {
+
+                    {
+                    int paddingLength = 8 - totalDataSize;
+                    if (paddingLength > 0)
+                        {
+                        for (int i = 0; i < paddingLength; i++)
+                            {
+                            data.Add(0); // Add zeros at the end
+                            }
+                        }
+                    }
+
+                }
             Console.WriteLine($"totalDataSize: {totalDataSize}");
+            int dataSize = data.Count;
             List<double> x = new List<double>();
 
             for (int i = 0; i < batch_size; i++)
                 {
-                //if (totalDataSize < block_Size do padding)
-                int startIndex = random.Next(totalDataSize - block_size);
+                int startIndex = random.Next(dataSize - block_size);
                 for (int j = 0; j < block_size; j++)
                     {
                     x.Add(data[startIndex + j]);
@@ -187,6 +201,13 @@ namespace NeoCortexApiSample
         }
 
     }
+
+
+
+
+
+
+
 
 
 
