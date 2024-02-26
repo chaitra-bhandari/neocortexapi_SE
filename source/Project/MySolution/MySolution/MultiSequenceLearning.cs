@@ -306,6 +306,44 @@ namespace NeoCortexApiSample
                         Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
                         maxMatchCnt = 0;
                     }
+                    double CalculateMSE(List<double> predictedValues, List<double> actualValues)
+                    {
+                        double sumSquaredErrors = 0.0;
+
+                        // Calculate the sum of squared errors
+                        for (int i = 0; i < predictedValues.Count; i++)
+                        {
+                            double error = predictedValues[i] - actualValues[i];
+                            sumSquaredErrors += error * error;
+                        }
+
+                        // Calculate the mean squared error
+                        double mse = sumSquaredErrors / predictedValues.Count;
+                        return mse;
+                    }
+
+                    // Main training loop
+                    //foreach (var input1 in inputs)
+                    //{
+                        //for (int i = 0; i < maxCycles; i++)
+                        //{
+                            // Other parts of the loop...
+
+                            // Example: Calculate loss using Mean Squared Error
+                            double loss = CalculateMSE(lastPredictedValues.Select(double.Parse).ToList(), inputs);
+                            Debug.WriteLine($"Current loss: {loss}");
+
+                            // Example: Check for convergence or other conditions based on the loss
+                            // Example:
+                            // if (loss < threshold)
+                            // {
+                            //     // Perform some action
+                            // }
+
+                            // Other parts of the loop...
+                       // }
+                    //}
+
 
                     // This resets the learned state, so the first element starts allways from the beginning.
                     tm.Reset(mem);
