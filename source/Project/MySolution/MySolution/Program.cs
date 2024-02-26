@@ -1,4 +1,4 @@
-﻿using NeoCortexApi;
+﻿/*using NeoCortexApi;
 using NeoCortexApi.Encoders;
 using System;
 using System.Collections.Generic;
@@ -8,9 +8,6 @@ using System.Reflection.Metadata;
 using System.Text;
 using static NeoCortexApiSample.MultiSequenceLearning;
 using static System.Net.Mime.MediaTypeNames;
-using System.IO;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 
 namespace NeoCortexApiSample
 {
@@ -34,13 +31,11 @@ namespace NeoCortexApiSample
 
             Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
 
-            //path to the input text and document files.
+            //path to the input text file.
             string filePath = @"filename.txt";
-            string filepath1 = @"filename.doc";
 
             //Call the function to read the file and convert to char array.
             List<char> charList = ReadFileAndConvertToCharList(filePath);
-            List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
 
             foreach (char character in charList)
             {
@@ -49,15 +44,6 @@ namespace NeoCortexApiSample
                 asciiSequence.Add(asciiValue);
 
             }
-
-            foreach (char character in charList1)
-            {
-                double asciiValue1 = (double)character;
-
-                asciiSequence.Add(asciiValue1);
-
-            }
-
             Console.WriteLine("ASCII Sequence:");
 
             foreach (int asciiCode in asciiSequence)
@@ -75,9 +61,14 @@ namespace NeoCortexApiSample
             // These list are used to see how the prediction works.
             // Predictor is traversing the list element by element. 
             // By providing more elements to the prediction, the predictor delivers more precise result.
+           // var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
+            //var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
+            //var list3 = new double[] { 'c', 'i' };
+
             var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
-            var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
+            var list2 = new double[] { 'S', 'E', 'C', 'O', 'N' ,'D'};
             var list3 = new double[] { 'c', 'i' };
+
 
 
             predictor.Reset();
@@ -116,14 +107,14 @@ namespace NeoCortexApiSample
                     Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
                 }
                 else
-                    Debug.WriteLine(" Prediction Unsuccessful :( ");
+                    Debug.WriteLine("Nothing predicted :( ");
             }
 
             Debug.WriteLine("------------------------------");
         }
 
         //function to read the file and return  char array.
-        /*static List<char> ReadFileAndConvertToCharList(string filePath)
+        static List<char> ReadFileAndConvertToCharList(string filePath)
         {
             List<char> charList = new List<char>();
 
@@ -163,62 +154,115 @@ namespace NeoCortexApiSample
     }
 
 }*/
-        // Modified function to read the file and return  char array.
-        static List<char> ReadFileAndConvertToCharList(string filePath, string outputFilePath)
-        {
-            List<char> charList = new List<char>();
+using NeoCortexApi;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
+namespace NeoCortexApiSample
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            RunExperiment();
+        }
+
+        private static void RunExperiment()
+        {
+            List<double> asciiSequence = GetAsciiSequenceFromFile("filename.txt");
+
+            Console.WriteLine("ASCII Sequence:");
+            foreach (int asciiCode in asciiSequence)
+            {
+                Console.Write(asciiCode + " ");
+            }
+
+            Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>> { { "S1", asciiSequence } };
+
+            MultiSequenceLearning experiment = new MultiSequenceLearning();
+            var predictor = experiment.Run(sequences);
+
+            TestPredictions(predictor, new double[] { 'F', 'i', 'r', 's', 't' });
+            TestPredictions(predictor, new double[] { 'S', 'E', 'C', 'O', 'N', 'D' });
+            //TestPredictions(predictor, new double[] { 'c', 'i' });
+            TestPredictions(predictor, new double[] { 'f', 'i', 'r', 's', 't' });
+            TestPredictions(predictor, new double[] { 's', 'e', 'c', 'o', 'n', 'd' });
+
+        }
+
+        private static List<double> GetAsciiSequenceFromFile(string filePath)
+        {
             try
             {
-                if (!File.Exists(filePath))
-                {
-                    Console.WriteLine("Error: File does not exist.");
-                    return charList;
-                }
-
-                // Read all text from the file
+                // Read the content of a file
                 string fileContent = File.ReadAllText(filePath);
-
-                //Remove \r, \n, \t, and regular spaces
+                // Remove spaces, tabs, carriage returns, and line feeds
                 string cleanedContent = fileContent.Replace("\r", "").Replace("\n", "").Replace("\t", "").Replace(" ", "");
+                // Convert the cleaned content to a single string
+                string joinedString = string.Join("", cleanedContent.ToCharArray());
+                // Write the cleaned content to a new file
+                File.WriteAllText(@"outputFilePath", joinedString);
+                // Display a success message
+                Console.WriteLine("Spaces removed successfully.");
 
-                //Write the cleaned content to the output file
-                File.WriteAllText(outputFilePath, cleanedContent, Encoding.UTF8);
 
-                Console.WriteLine("The spaces have been removed successfully.");
-
-                //Convert the cleaned content to char array
-                char[] charArray = cleanedContent.ToCharArray();
-
-                //Convert the char array to a list
-                charList.AddRange(charArray);
-            }
-            catch (FileNotFoundException ex)
-            {
-                Console.WriteLine("Error: File not found - " + ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Console.WriteLine("Error: Unauthorized access - " + ex.Message);
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine("Error: Input/Output error - " + ex.Message);
+                string fileContent1 = File.ReadAllText(@"outputFilePath");
+                return fileContent1.Select(character => (double)character).ToList();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);
+                Console.WriteLine("Error reading the file: " + ex.Message);
+                return new List<double>();
+            }
+        }
+
+        private static void TestPredictions(Predictor predictor, double[] list)
+        {
+            Debug.WriteLine("------------------------------");
+
+            foreach (var item in list)
+            {
+                var res = predictor.Predict(item);
+
+                if (res.Count > 0)
+                {
+                    var pred = res.First();
+                    Debug.WriteLine($"{pred.PredictedInput} - {pred.Similarity}");
+
+                    var tokens = pred.PredictedInput.Split('_');
+                    var tokens2 = pred.PredictedInput.Split('-');
+
+                    Console.WriteLine(tokens2.Last());
+
+                    var tokens3 = tokens2.Last();
+
+                    Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
+                }
+                else
+                {
+                    Debug.WriteLine("Nothing predicted :( ");
+                }
             }
 
-            return charList;
+            Debug.WriteLine("------------------------------");
         }
     }
 }
 
 
-       
 
-    
+
+
+
+
+
+
+
+
+
 
 
 
