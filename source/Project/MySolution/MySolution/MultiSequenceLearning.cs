@@ -27,6 +27,7 @@ namespace NeoCortexApiSample
 
             int inputBits = 100;
             int numColumns = 1024;
+            
 
             HtmConfig cfg = new HtmConfig(new int[] { inputBits }, new int[] { numColumns })
             {
@@ -262,35 +263,33 @@ namespace NeoCortexApiSample
                         // we have a match.
 
 
-                        double binaryCrossEntropy = CalculatebinaryCrossEntropy(inputValues, estimatedProbabilities);
-                        Debug.WriteLine($"Binary Cross-Entropy: {binaryCrossEntropy}");
-
-                        List<double> GetGroundTruthProbabilities(double input)
+                        static double CalculateBinaryCrossEntropy(double[] yTrue, double[] yPred)
                         {
-                            // Define and return ground truth probabilities based on your training dataset
-                            // This can be a simple logic or loaded from a file, depending on your requirements
-                            List<double> groundTruthProbabilities = new List<double>();
+                            const double epsilon = 1e-15; // to prevent log(0) cases
 
-                            // ... (define ground truth probabilities)
-
-                            return groundTruthProbabilities;
-                        }
-
-                        // Add this method to calculate binary cross-entropy
-                        static double CalculateBinaryCrossEntropy(List<double> targets, List<double> predictions)
-                        {
-                            if (targets.Count != predictions.Count)
-                                throw new ArgumentException("Lists must have the same length.");
-
-                            double crossEntropy = 0.0;
-
-                            for (int i = 0; i < targets.Count; i++)
+                            // Clip predictions to avoid log(0) or log(1)
+                            for (int i = 0; i < yPred.Length; i++)
                             {
-                                crossEntropy += targets[i] * Math.Log(predictions[i]) + (1 - targets[i]) * Math.Log(1 - predictions[i]);
+                                yPred[i] = Math.Max(epsilon, Math.Min(1 - epsilon, yPred[i]));
                             }
 
-                            // Take the negative to get the final binary cross-entropy
-                            return -crossEntropy / targets.Count;
+                            // BCE formula: -[y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred)]
+                            double loss = 0;
+                            for (int i = 0; i < yTrue.Length; i++)
+                            {
+                                loss += -(yTrue[i] * Math.Log(yPred[i]) + (1 - yTrue[i]) * Math.Log(1 - yPred[i]));
+                            }
+
+                            return loss / yTrue.Length; // Mean loss
+                        }
+
+                        static void Main()
+                        {
+                            double[] yTrue = { 0, 1, 1, 0 };
+                            double[] yPred = { 0.2, 0.8, 0.9, 0.1 };
+
+                            double bceLoss = CalculateBinaryCrossEntropy(yTrue, yPred);
+                            Console.WriteLine("Binary Cross Entropy Loss: " + bceLoss);
                         }
 
 
@@ -451,6 +450,13 @@ namespace NeoCortexApiSample
         /// <param name="input"></param>
         /// <param name="sequence"></param>
         /// <returns></returns>
+        /// 
+
+
+
+
+
+
         private static string GetKey(List<string> prevInputs, double input)
         {
             string key = String.Empty;
