@@ -10,7 +10,10 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace NeoCortexApiSample
     {
     class Program
+        
         {
+        
+
         static void Main(string[] args)
             {
             RunMultiSequenceLearningExperiment();
@@ -59,81 +62,145 @@ namespace NeoCortexApiSample
             int batch_size = 4;
 
             List<double> x = GetBatch(inputValues, block_size, batch_size);
-
-            for (int i = 0; i < x.Count; i += block_size )
+            foreach (var item in x)
                 {
-                List<double> chunk = x.GetRange(i, block_size );
-
-
-
-                Console.WriteLine("Batch:");
-                foreach (var item in chunk)
-                    {
-                    Console.Write(item + " ");
-                    }
-
-                //Prototype for building the prediction engine.}
-                MultiSequenceLearning experiment = new MultiSequenceLearning();
-                var predictor = experiment.Run(chunk);
-
-
-
-
-                // These list are used to see how the prediction works.
-                // Predictor is traversing the list element by element. 
-                // By providing more elements to the prediction, the predictor delivers more precise result.
-                var list1 = new double[] { 'T', 'r', 'a', 'i', 'n' };
-                //var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
-                // var list3 = new double[] { 'y', 'o', 'u' };
-
-
-                //predictor.Reset();
-                //PredictNextElement(predictor, list1);
-
-                //predictor.Reset();
-                //PredictNextElement(predictor, list2);
-
-                predictor.Reset();
-                PredictNextElement(predictor, list1);
+                Console.Write(item + " ");
                 }
-            }
 
-        private static void PredictNextElement(Predictor predictor, double[] list)
+
+
+
+
+            //Prototype for building the prediction engine.}
+            MultiSequenceLearning experiment = new MultiSequenceLearning();
+
+                {
+
+                
+
+
+                
+
+                for (int i = 0; i < x.Count; i += block_size)
+                    {
+                    List<double> chunk = x.GetRange(i, block_size);
+
+
+                    Console.WriteLine("Batch:");
+                    foreach (var item in chunk)
+                        {
+                        Console.Write(item + " ");
+                        }
+
+
+                    var predictor = experiment.Run(chunk);
+                    int n = x.Count;
+                    if (n < 32)
+                        {
+                        continue;
+                        }
+
+                    
+
+                    Console.Write("Ask Question: ");
+
+                    // Read the user's input from the console
+                    string inputText = Console.ReadLine();
+
+                    List<double> asciiVal = new List<double>();
+
+                    foreach (char c in inputText)
+                        {
+                        asciiVal.Add((double)c);
+                        }
+
+
+
+                    //Generate chatGPT model
+                    PredictNextElement(predictor, asciiVal);
+
+
+                    }
+                
+
+
+                }
+
+           
+
+
+            }
+            
+       
+        public static void PredictNextElement(Predictor predictor, List<double> myList)
             {
             Debug.WriteLine("------------------------------");
 
-            foreach (var item in list)
+            foreach (var item in myList)
                 {
+                //list <double> res = predictor.Predict(asciiValues);
                 var res = predictor.Predict(item);
-
-                if (res.Count > 0)
+                if (item == myList.First())
                     {
-                    foreach (var pred in res)
+                    if (res.Count > 0)
                         {
-                        Debug.WriteLine($"{pred.PredictedInput} - {pred.Similarity}");
+                        //foreach (var pred in res)
+                        //    {
+                        //    Debug.WriteLine($"{pred.PredictedInput} - {pred.Similarity}");
+                        //    }
+
+                        var tokens = res.First().PredictedInput.Split('_');
+
+                        var tokens2 = res.First().PredictedInput.Split('-');
+
+                        Console.WriteLine($"token 2 ={tokens2.Last()}");
+
+                        var tokens3 = tokens2.Last();
+
+                        Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
+
+                        //List<double> responseSequence = new List<double>(asciiValues);
+
+                        //responseSequence.Add(tokens3.Last());
+
+                        string[] parts = tokens[0].Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        // Create a list to store the double values
+                        List<double> doubleList = new List<double>();
+
+                        // Parse each part into a double and add it to the list
+                        foreach (string part in parts)
+                            {
+                            double value = double.Parse(part);
+                            doubleList.Add(value);
+                            }
+                        //List<double> responseSequence = new List<double>(Array.ConvertAll(tokens[0].Split(' - '), double.Parse));
+
+
+                        string generatedResponse = DecodeNumericalSequence(doubleList);
+
+                        Console.WriteLine("Generated Response: " + generatedResponse); ;
                         }
-
-                    var tokens = res.First().PredictedInput.Split('_');
-
-                    var tokens2 = res.First().PredictedInput.Split('-');
-
-                    Console.WriteLine($"token 2 ={tokens2.Last()}");
-
-                    var tokens3 = tokens2.Last();
-
-                    Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
-
                     }
                 else
                     Debug.WriteLine("Nothing predicted :( ");
+                //}
+
+
+                Debug.WriteLine("------------------------------");
+
+                static string DecodeNumericalSequence(List<double> generatedTokens)
+                    {
+                    // Decode generated tokens to characters
+                    string decodedString = "";
+                    foreach (int token in generatedTokens)
+                        {
+                        decodedString += (char)token;
+                        }
+                    return decodedString;
+                    }
                 }
-
-            Debug.WriteLine("------------------------------");
             }
-
-
-
-
         //Function to read the file and return  char array.
         public static List<char> ReadFileAndConvertToCharList(string filePath)
             {
@@ -208,9 +275,18 @@ namespace NeoCortexApiSample
 
             return x;
             }
-        }
 
+      
+
+        }
+    
     }
+
+
+
+
+
+
 
 
 
