@@ -34,6 +34,28 @@ namespace NeoCortexApiSample
             //Call the function to read the file and convert to char array.
             List<char> charList = ReadFileAndConvertToCharList(filePath);
 
+            try
+            {
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        // Remove special characters from each line before processing
+                        string cleanedLine = line.Replace("\r", "").Replace("\n", "")
+                                                    .Replace("\t", "").Replace(" ", "");
+
+                        // Convert the cleaned line to char array and add to charList
+                        charList.AddRange(cleanedLine.ToCharArray());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error reading the file: " + ex.Message);
+            }
+       
+
             //Add asciiValue to a List 
             foreach (char character in charList)
             {
@@ -53,10 +75,10 @@ namespace NeoCortexApiSample
             //Call a method to devide the inpit values as batches
 
             //Define block size.
-            int block_size = 8;
+            int block_size = 16;
 
             //Define batch size.
-            int batch_size = 4;
+            int batch_size = 8;
 
             List<double> x = GetBatch(inputValues, block_size, batch_size);
 
@@ -213,18 +235,6 @@ namespace NeoCortexApiSample
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
