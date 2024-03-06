@@ -5,9 +5,9 @@ using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 
 namespace NeoCortexApiSample
@@ -17,17 +17,23 @@ namespace NeoCortexApiSample
     /// </summary>
     public class MultiSequenceLearning
     {
+        private object predictions;
+
         /// <summary>
         /// Runs the learning of sequences.
         /// </summary>
         /// <param name="sequences">Dictionary of sequences. KEY is the sewuence name, the VALUE is th elist of element of the sequence.</param>
+        /// <returns>The calculated MSE.</returns>
+        private double CalculateMSE(double predicted, double actual)
+        {
+            return Math.Pow(predicted - actual, 2);
+        }
         public Predictor Run(List<double> inputValues)
         {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
 
             int inputBits = 100;
             int numColumns = 1024;
-            
 
             HtmConfig cfg = new HtmConfig(new int[] { inputBits }, new int[] { numColumns })
             {
@@ -78,9 +84,14 @@ namespace NeoCortexApiSample
         /// <summary>
         ///
         /// </summary>
-        //private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<double> inputValues)
         private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<double> inputValues)
         {
+            // ... inside RunExperiment function ...
+
+            // Introduce variables for storing loss and loss history
+            double currentLoss;
+            List<double> lossHistory = new List<double>();
+
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
@@ -178,14 +189,15 @@ namespace NeoCortexApiSample
             int maxPrevInputs = inputValues.Count - 1;
 
             List<string> previousInputs = new List<string>();
-            List<double> estimatedProbabilities = new List<double>();
 
             previousInputs.Add("-1.0");
 
             // Set on true if the system has learned the sequence with a maximum acurracy.
             bool isLearningCompleted = false;
 
-            //
+
+
+            
             // Now training with SP+TM. SP is pretrained on the given input pattern set.
             foreach (var input1 in inputs)
             {
@@ -231,7 +243,6 @@ namespace NeoCortexApiSample
 
                         List<Cell> actCells;
 
-
                         if (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count)
                         {
                             actCells = lyrOut.ActiveCells;
@@ -241,18 +252,6 @@ namespace NeoCortexApiSample
                             actCells = lyrOut.WinnerCells;
                         }
 
-
-                        double estimatedProbability = (double)actCells.Count /1024;
-                        estimatedProbabilities.Add(estimatedProbability);
-
-
-                        double CalculatebinaryCrossEntropy(List<double> GetGroundTruthProbabilities, List<double> estimatedProbabilities)
-                       {
-                           throw new NotImplementedException();
-                        
-                       }
-
-
                         cls.Learn(key, actCells.ToArray());
 
                         Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
@@ -261,37 +260,6 @@ namespace NeoCortexApiSample
                         //
                         // If the list of predicted values from the previous step contains the currently presenting value,
                         // we have a match.
-
-
-                        static double CalculateBinaryCrossEntropy(double[] yTrue, double[] yPred)
-                        {
-                            const double epsilon = 1e-15; // to prevent log(0) cases
-
-                            // Clip predictions to avoid log(0) or log(1)
-                            for (int i = 0; i < yPred.Length; i++)
-                            {
-                                yPred[i] = Math.Max(epsilon, Math.Min(1 - epsilon, yPred[i]));
-                            }
-
-                            // BCE formula: -[y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred)]
-                            double loss = 0;
-                            for (int i = 0; i < yTrue.Length; i++)
-                            {
-                                loss += -(yTrue[i] * Math.Log(yPred[i]) + (1 - yTrue[i]) * Math.Log(1 - yPred[i]));
-                            }
-
-                            return loss / yTrue.Length; // Mean loss
-                        }
-
-                        static void Main()
-                        {
-                            double[] yTrue = { 0, 1, 1, 0 };
-                            double[] yPred = { 0.2, 0.8, 0.9, 0.1 };
-
-                            double bceLoss = CalculateBinaryCrossEntropy(yTrue, yPred);
-                            Console.WriteLine("Binary Cross Entropy Loss: " + bceLoss);
-                        }
-
 
 
                         if (lastPredictedValues.Contains(key))
@@ -324,11 +292,24 @@ namespace NeoCortexApiSample
                             lastPredictedValues = new List<string>();
                         }
 
+
+                        // After predicting the next element
+                      
+                        currentLoss = CalculateMSE(0, inputValues[cycle + 1]);
+                       // double doubleValue = double.Parse(lastPredictedValues);  // Conversion to double
+                        // Assuming predictions[0] holds the predicted value
+
+
+                        // Append current loss to the history
+                        lossHistory.Add(currentLoss);
+
+
                     }
+                    
+                    
+
 
                     // The first element (a single element) in the sequence cannot be predicted
-                    //double accuracy = CalculateSequenceAccuracy(groundTruthSequence, predictedSequence);
-
                     double maxPossibleAccuraccy = (double)((double)inputValues.Count() - 1) / (double)inputValues.Count() * 100.0;
 
                     double accuracy = (double)matches / (double)inputValues.Count() * 100.0;
@@ -343,7 +324,7 @@ namespace NeoCortexApiSample
 
                         //
                         // Experiment is completed if we are 30 cycles long at the 100% accuracy.
-                        if (maxMatchCnt >= 30)
+                        if (lossHistory.Average() <= 30)
                         {
                             sw.Stop();
                             Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {inputValues} learning time: {sw.Elapsed}.");
@@ -357,10 +338,11 @@ namespace NeoCortexApiSample
                         maxMatchCnt = 0;
                     }
 
+                    
+
                     // This resets the learned state, so the first element starts allways from the beginning.
                     tm.Reset(mem);
                 }
-                
 
                 if (isLearningCompleted == false)
                     throw new Exception($"The system didn't learn with expected acurracy!");
@@ -372,74 +354,8 @@ namespace NeoCortexApiSample
             return new Predictor(layer1, mem, cls);
         }
 
-        // ... (your existing code)
 
-       /* private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<double> inputValues)
-        {
-            // ... (your existing code)
 
-            // Initialize a list to store estimated probabilities for each input
-            List<double> estimatedProbabilities = new List<double>();
-
-            // ... (your existing code)
-
-            // Now training with SP+TM. SP is pretrained on the given input pattern set.
-            foreach (var input1 in inputs)
-            {
-                for (int i = 0; i < maxCycles; i++)
-                {
-                    matches = 0;
-
-                    cycle++;
-
-                    Debug.WriteLine($"-------------- Cycle {cycle} ---------------");
-
-                    foreach (var input in inputs)
-                    {
-                        Debug.WriteLine($"-------------- {input} ---------------");
-
-                        // lyrOut is null when the TM is added to the layer inside of HPC callback by entering of the stable state.
-                        var lyrOut = layer1.Compute(input, true) as ComputeCycle;
-
-                        var activeColumns = layer1.GetResult("sp") as int[];
-
-                        // ... (your existing code)
-
-                        // Estimate probability based on the number of active cells
-                        double estimatedProbability = (double)actCells.Count / numColumns;
-                        estimatedProbabilities.Add(estimatedProbability);
-
-                        // ... (your existing code)
-                    }
-
-                    // Calculate binary cross-entropy based on estimated probabilities and ground truth
-                    double binaryCrossEntropy = CalculateBinaryCrossEntropy(groundTruthProbabilities, estimatedProbabilities);
-                    Debug.WriteLine($"Binary Cross-Entropy: {binaryCrossEntropy}");
-
-                    // ... (your existing code)
-                }
-            }
-
-            // ... (your existing code)
-        }
-
-        // Add this method to calculate binary cross-entropy
-        private static double CalculateBinaryCrossEntropy(List<double> targets, List<double> predictions)
-        {
-            if (targets.Count != predictions.Count)
-                throw new ArgumentException("Lists must have the same length.");
-
-            double crossEntropy = 0.0;
-
-            for (int i = 0; i < targets.Count; i++)
-            {
-                crossEntropy += targets[i] * Math.Log(predictions[i]) + (1 - targets[i]) * Math.Log(1 - predictions[i]);
-            }
-
-            // Take the negative to get the final binary cross-entropy
-            return -crossEntropy / targets.Count;
-        }
-       */
 
         /// <summary>
         /// Constracts the unique key of the element of an sequece. This key is used as input for HtmClassifier.
@@ -450,13 +366,6 @@ namespace NeoCortexApiSample
         /// <param name="input"></param>
         /// <param name="sequence"></param>
         /// <returns></returns>
-        /// 
-
-
-
-
-
-
         private static string GetKey(List<string> prevInputs, double input)
         {
             string key = String.Empty;
