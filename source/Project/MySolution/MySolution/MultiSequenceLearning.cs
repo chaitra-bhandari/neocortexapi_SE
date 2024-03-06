@@ -312,71 +312,113 @@ namespace NeoCortexApiSample
                     tm.Reset(mem);
                 }
 
-               /* double BinaryCrossEntropy(List<double> predictedValues, List<double> actualValues)
+                /* double BinaryCrossEntropy(List<double> predictedValues, List<double> actualValues)
+                 {
+                     double sumLoss = 0.0;
+
+                     // Ensure both lists have the same length
+                     if (predictedValues.Count != actualValues.Count)
+                         throw new ArgumentException("Predicted values and actual values must have the same length.");
+
+                     // Calculate binary cross-entropy loss for each predicted-actual pair
+                     for (int i = 0; i < predictedValues.Count; i++)
+                     {
+                         double predicted = predictedValues[i];
+                         double actual = actualValues[i];
+
+                         // Ensure the predicted value is within a valid range (e.g., [0, 1])
+                         predicted = Math.Max(1e-15, Math.Min(1 - 1e-15, predicted));
+
+                         // Calculate binary cross-entropy loss for this pair
+                         double loss = -((actual * Math.Log(predicted)) + ((1 - actual) * Math.Log(1 - predicted)));
+
+                         sumLoss += loss;
+                     }
+
+                     // Average the loss over all predicted-actual pairs
+                     double averageLoss = sumLoss / predictedValues.Count;
+
+                     return averageLoss;
+                 }*/
+
+                /*  /// <summary>
+                  /// Runs the learning of sequences.
+                  /// </summary>
+                  /// <param name="inputValues">List of input values.</param>
+                  /// <returns>The predictor object.</returns>
+                 // Predictor Run(List<double> inputValues)
+
+
+
+                      // Initialize a list to store predicted values
+                      List<double> predictedValues = new List<double>();
+
+                      // Initialize a list to store actual (true) values
+                      List<double> actualValues = new List<double>();
+
+                      // Training loop
+                      foreach (var input in inputs)
+                      {
+                          // Forward pass: Compute predictions
+                          var prediction = layer1.Compute(input, true);
+
+                          // Update predicted values list
+                          predictedValues.Add(-1);
+
+                          // Update actual values list (you need to provide actual values)
+                          actualValues.Add(50);
+                      }
+
+                      // Calculate binary cross-entropy loss
+                      double loss = BinaryCrossEntropy(predictedValues, actualValues);
+
+                      // Log the loss or use it for further processing
+                      Debug.WriteLine($"Binary Cross-Entropy Loss: {loss}");*/
+
+                // Method to calculate binary cross entropy loss
+                static double BinaryCrossEntropy(List<double> yTrue, List<double> yPred)
                 {
-                    double sumLoss = 0.0;
-
-                    // Ensure both lists have the same length
-                    if (predictedValues.Count != actualValues.Count)
-                        throw new ArgumentException("Predicted values and actual values must have the same length.");
-
-                    // Calculate binary cross-entropy loss for each predicted-actual pair
-                    for (int i = 0; i < predictedValues.Count; i++)
+                    if (yTrue.Count != yPred.Count)
                     {
-                        double predicted = predictedValues[i];
-                        double actual = actualValues[i];
-
-                        // Ensure the predicted value is within a valid range (e.g., [0, 1])
-                        predicted = Math.Max(1e-15, Math.Min(1 - 1e-15, predicted));
-
-                        // Calculate binary cross-entropy loss for this pair
-                        double loss = -((actual * Math.Log(predicted)) + ((1 - actual) * Math.Log(1 - predicted)));
-
-                        sumLoss += loss;
+                        throw new ArgumentException("The number of elements in yTrue and yPred must be the same.");
                     }
 
-                    // Average the loss over all predicted-actual pairs
-                    double averageLoss = sumLoss / predictedValues.Count;
+                    double totalLoss = 0.0;
+
+                    for (int i = 0; i < yTrue.Count; i++)
+                    {
+                        totalLoss += -(yTrue[i] * Math.Log(yPred[i]) + (1 - yTrue[i]) * Math.Log(1 - yPred[i]));
+                    }
+
+                    // Average loss over all samples
+                    double averageLoss = totalLoss / yTrue.Count;
 
                     return averageLoss;
-                }*/
 
-              /*  /// <summary>
-                /// Runs the learning of sequences.
-                /// </summary>
-                /// <param name="inputValues">List of input values.</param>
-                /// <returns>The predictor object.</returns>
-               // Predictor Run(List<double> inputValues)
-                
-                 
 
-                    // Initialize a list to store predicted values
-                    List<double> predictedValues = new List<double>();
 
-                    // Initialize a list to store actual (true) values
-                    List<double> actualValues = new List<double>();
+                }
+                // Example usage
+                static void Entropy(string[] args)
+                {
+                    // Example lists of true and predicted values
+                    List<double> yTrue = new List<double> { 1, 0, 1, 0, 1 };
+                    List<double> yPred = new List<double> { 0.9, 0.2, 0.8, 0.1, 0.7 };
 
-                    // Training loop
-                    foreach (var input in inputs)
-                    {
-                        // Forward pass: Compute predictions
-                        var prediction = layer1.Compute(input, true);
+                    // Calculate binary cross entropy loss
+                    double loss = BinaryCrossEntropy(yTrue, yPred);
 
-                        // Update predicted values list
-                        predictedValues.Add(-1);
+                    Console.WriteLine("Binary Cross Entropy Loss: " + loss);
+                }
 
-                        // Update actual values list (you need to provide actual values)
-                        actualValues.Add(50);
-                    }
 
-                    // Calculate binary cross-entropy loss
-                    double loss = BinaryCrossEntropy(predictedValues, actualValues);
 
-                    // Log the loss or use it for further processing
-                    Debug.WriteLine($"Binary Cross-Entropy Loss: {loss}");*/
 
-                   
-                
+
+
+
+
+
 
                 if (isLearningCompleted == false)
                     throw new Exception($"The system didn't learn with expected acurracy!");
