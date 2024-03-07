@@ -9,6 +9,9 @@ This project implements a new method __RunLanguageSemanticExperiment()__ for lea
 
 
 # Getting Started
+
+## Processing input data
+
 The input file of a very long text sequence is converted into a list of ASCII characters by removing all the control characters like \r, \n, \t, etc.
 
       List<double> inputValues = new List<double>();
