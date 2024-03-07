@@ -95,6 +95,7 @@ namespace NeoCortexApiSample
                 //Thread.Sleep(1000);
 
                 //Generate chatGPT model
+                predictor.Reset();
                 PredictNextElement(predictor, asciiVal);
                 }
             }
