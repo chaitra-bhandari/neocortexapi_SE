@@ -158,6 +158,7 @@ namespace NeoCortexApiSample
                         var tokens3 = tokens2.Last();
 
                         Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
+                        Console.WriteLine("logLoss");
 
                         //List<double> responseSequence = new List<double>(asciiValues);
 

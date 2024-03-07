@@ -5,7 +5,6 @@ using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Linq;
 
@@ -13,21 +12,47 @@ using System.Linq;
 namespace NeoCortexApiSample
 {
     /// <summary>
-    /// Implements an experiment that demonstrates how to learn sequences.
-    /// </summary>
+    /// Calculate Binary Cross Entropy (Log Loss) between predicted values and actual labels.
+    /// Implements an experiment that demonstrates how to learn sequences
+    
+
     public class MultiSequenceLearning
     {
-        private object predictions;
-
         /// <summary>
         /// Runs the learning of sequences.
         /// </summary>
         /// <param name="sequences">Dictionary of sequences. KEY is the sewuence name, the VALUE is th elist of element of the sequence.</param>
-        /// <returns>The calculated MSE.</returns>
-        private double CalculateMSE(double predicted, double actual)
+        /// Calculate Binary Cross Entropy (Log Loss) between predicted values and actual labels.
+
+        /// <param name="predictedValues">List of predicted probabilities (values between 0 and 1).</param>
+        /// <param name="actualLabels">List of actual binary labels (0 or 1).</param>
+        /// <returns>Binary Cross Entropy (Log Loss) value.</returns>
+        public double CalculateBinaryCrossEntropy(List<double> predictedValues, List<int> actualLabels)
         {
-            return Math.Pow(predicted - actual, 2);
+            if (predictedValues.Count != actualLabels.Count)
+            {
+                throw new ArgumentException("Number of predicted values and actual labels must match.");
+            }
+
+            double logLoss = 0.0;
+
+            for (int i = 0; i < predictedValues.Count; i++)
+            {
+                double p = predictedValues[i];
+                int y = actualLabels[i];
+
+                // Avoid log(0) by adding a small epsilon value
+                double epsilon = 1e-15;
+                p = Math.Max(epsilon, Math.Min(1 - epsilon, p));
+
+                logLoss += y * Math.Log(p) + (1 - y) * Math.Log(1 - p);
+            }
+
+            logLoss = -logLoss / predictedValues.Count;
+
+            return logLoss;
         }
+
         public Predictor Run(List<double> inputValues)
         {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
@@ -86,12 +111,6 @@ namespace NeoCortexApiSample
         /// </summary>
         private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<double> inputValues)
         {
-            // ... inside RunExperiment function ...
-
-            // Introduce variables for storing loss and loss history
-            double currentLoss;
-            List<double> lossHistory = new List<double>();
-
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
@@ -195,9 +214,7 @@ namespace NeoCortexApiSample
             // Set on true if the system has learned the sequence with a maximum acurracy.
             bool isLearningCompleted = false;
 
-
-
-            
+            //
             // Now training with SP+TM. SP is pretrained on the given input pattern set.
             foreach (var input1 in inputs)
             {
@@ -292,22 +309,7 @@ namespace NeoCortexApiSample
                             lastPredictedValues = new List<string>();
                         }
 
-
-                        // After predicting the next element
-                      
-                        currentLoss = CalculateMSE(0, inputValues[cycle + 1]);
-                       // double doubleValue = double.Parse(lastPredictedValues);  // Conversion to double
-                        // Assuming predictions[0] holds the predicted value
-
-
-                        // Append current loss to the history
-                        lossHistory.Add(currentLoss);
-
-
                     }
-                    
-                    
-
 
                     // The first element (a single element) in the sequence cannot be predicted
                     double maxPossibleAccuraccy = (double)((double)inputValues.Count() - 1) / (double)inputValues.Count() * 100.0;
@@ -324,7 +326,7 @@ namespace NeoCortexApiSample
 
                         //
                         // Experiment is completed if we are 30 cycles long at the 100% accuracy.
-                        if (lossHistory.Average() <= 30)
+                        if (maxMatchCnt >= 30)
                         {
                             sw.Stop();
                             Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {inputValues} learning time: {sw.Elapsed}.");
@@ -337,8 +339,6 @@ namespace NeoCortexApiSample
                         Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
                         maxMatchCnt = 0;
                     }
-
-                    
 
                     // This resets the learned state, so the first element starts allways from the beginning.
                     tm.Reset(mem);
