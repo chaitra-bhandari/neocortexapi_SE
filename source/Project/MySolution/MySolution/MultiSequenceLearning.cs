@@ -260,6 +260,38 @@ namespace NeoCortexApiSample
                             //var predictedInputValue = cls.GetPredictedInputValue(lyrOut.PredictiveCells.ToArray());
                             var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
                             Console.WriteLine($"predictedInputValues : {predictedInputValues}");
+                            /*double loss = BinaryCrossEntropyLoss(predictedProbabilities, actualLabels.ToArray());
+                            static double BinaryCrossEntropyLoss(double[] predictedProbabilities, double[] actualLabels)
+                            {
+                                if (predictedProbabilities.Length != actualLabels.Length)
+                                {
+                                    throw new ArgumentException("Predicted probabilities and actual labels must have the same length.");
+                                }
+
+                                double totalLoss = 0.0;
+                                for (int i = 0; i < predictedProbabilities.Length; i++)
+                                {
+                                    // Clip probabilities
+                                    double eps = 1e-7;
+                                    double clippedProbability = Math.Max(eps, Math.Min(1 - eps, predictedProbabilities[i]));
+
+                                    // Calculate binary cross-entropy loss
+                                    totalLoss -= (actualLabels[i] * Math.Log(clippedProbability) +
+                                                 (1 - actualLabels[i]) * Math.Log(1 - clippedProbability));
+                                }
+
+                                return totalLoss / predictedProbabilities.Length;  // Average loss across sequence
+                            }
+                            // Update network weights based on loss (replace with your optimizer)
+                            UpdateWeights(loss, networkParameters);
+                            // Replace this with your specific weight update function based on your chosen optimizer (e.g., gradient descent)
+                             void UpdateWeights(double loss, double[] networkParameters)
+                            {
+                                // Implement weight update logic based on the loss and optimizer algorithm
+                                throw new NotImplementedException("Weight update function not implemented. Replace with your optimizer logic.");
+                            }*/
+
+
 
                             foreach (var item in predictedInputValues)
                             {
@@ -375,7 +407,7 @@ namespace NeoCortexApiSample
                       // Log the loss or use it for further processing
                       Debug.WriteLine($"Binary Cross-Entropy Loss: {loss}");*/
 
-                // Method to calculate binary cross entropy loss
+              /*  // Method to calculate binary cross entropy loss
                 static double BinaryCrossEntropy(List<double> yTrue, List<double> yPred)
                 {
                     if (yTrue.Count != yPred.Count)
@@ -409,7 +441,7 @@ namespace NeoCortexApiSample
                     double loss = BinaryCrossEntropy(yTrue, yPred);
 
                     Console.WriteLine("Binary Cross Entropy Loss: " + loss);
-                }
+                }*/
 
 
 
