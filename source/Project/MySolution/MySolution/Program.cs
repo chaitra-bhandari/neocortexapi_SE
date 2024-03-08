@@ -53,6 +53,7 @@ namespace NeoCortexApiSample
                 Console.Write(item + " ");
             }
 
+
             //Call a method to devide the inpit values as batches
 
             //Define block size.
