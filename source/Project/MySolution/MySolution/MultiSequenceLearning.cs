@@ -27,7 +27,7 @@ namespace NeoCortexApiSample
         /// <param name="predictedValues">List of predicted probabilities (values between 0 and 1).</param>
         /// <param name="actualLabels">List of actual binary labels (0 or 1).</param>
         /// <returns>Binary Cross Entropy (Log Loss) value.</returns>
-        public double CalculateBinaryCrossEntropy(List<double> predictedInputValues, List<int> actualLabels)
+        /*public double CalculateBinaryCrossEntropy(List<double> predictedInputValues, List<int> actualLabels)
         {
             if (predictedInputValues.Count != actualLabels.Count)
             {
@@ -51,7 +51,7 @@ namespace NeoCortexApiSample
             logLoss = -logLoss / predictedValues.Count;
 
             return logLoss;
-        }
+        }*/
 
         public Predictor Run(List<double> inputValues)
         {

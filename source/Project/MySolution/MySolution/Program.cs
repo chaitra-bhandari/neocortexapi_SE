@@ -264,6 +264,8 @@ namespace NeoCortexApiSample
             }
             Console.WriteLine($"totalDataSize: {totalDataSize}");
             int dataSize = data.Count;
+            Console.WriteLine($"DataSize: {dataSize}");
+            Console.WriteLine($"block_size: {block_size}");
             List<double> x = new List<double>();
 
             for (int i = 0; i < batch_size; i++)
