@@ -21,6 +21,12 @@ namespace NeoCortexApiSample
         /// Runs the learning of sequences.
         /// </summary>
         /// <param name="sequences">Dictionary of sequences. KEY is the sewuence name, the VALUE is th elist of element of the sequence.</param>
+        private static object LossFunction;
+        private int numEpochs;
+        private double[] predictedSdrValues;
+        private double[] actualSdrValues;
+        private static readonly object testOutputArray;
+
         public Predictor Run(List<double> inputValues)
         {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
@@ -71,12 +77,16 @@ namespace NeoCortexApiSample
 
             EncoderBase encoder = new ScalarEncoder(settings);
 
+
             return RunExperiment(inputBits, cfg, encoder, inputValues);
         }
+
+
 
         /// <summary>
         ///
         /// </summary>
+        
         private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<double> inputValues)
         {
             Stopwatch sw = new Stopwatch();
@@ -95,7 +105,7 @@ namespace NeoCortexApiSample
             CortexLayer<object, object> layer1 = new CortexLayer<object, object>("L1");
 
             TemporalMemory tm = new TemporalMemory();
-
+           
             // For more information see following paper: https://www.scitepress.org/Papers/2021/103142/103142.pdf
             HomeostaticPlasticityController hpc = new HomeostaticPlasticityController(mem, numUniqueInputs * 150, (isStable, numPatterns, actColAvg, seenInputs) =>
             {
@@ -308,6 +318,16 @@ namespace NeoCortexApiSample
                             Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
                             lastPredictedValues = new List<string>();
                         }
+                        for (int epoch = 0; epoch < numEpochs; epoch++)
+                        {
+                            // Perform one epoch of training here
+
+                            // Calculate the binary cross entropy loss
+                            double loss = CalculateBinaryCrossEntropyLoss(actualSdrValues, predictedSdrValues);
+                            Console.WriteLine($"Epoch {epoch + 1}/{numEpochs} - Loss: {loss}");
+                        }
+
+
 
                     }
 
@@ -460,6 +480,18 @@ namespace NeoCortexApiSample
             Debug.WriteLine("------------ END ------------");
 
             return new Predictor(layer1, mem, cls);
+        }
+        public double CalculateBinaryCrossEntropyLoss(double[] actualSDR, double[] predictedSDR)
+        {
+            double loss = 0.0;
+            for (int i = 0; i < actualSDR.Length; i++)
+            {
+                if (actualSDR[i] > 0)
+                {
+                    loss += -Math.Log(predictedSDR[i]);
+                }
+            }
+            return loss / actualSDR.Length;
         }
 
 

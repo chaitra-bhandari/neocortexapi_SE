@@ -489,7 +489,12 @@ using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using NeoCortexApi.Encoders;
+using NeoCortexApi.Entities;
 //using static NeoCortexApi.Utility.GroupBy2<R>;
+using NeoCortexApi.Classifiers;
+using NeoCortexApi.Network;
+
 
 namespace NeoCortexApiSample
 {
@@ -759,18 +764,9 @@ namespace NeoCortexApiSample
 
             return x;
         }
-
-
-
-       
-
-
     }
 
 }
-
-
-
 
 
 
