@@ -318,14 +318,14 @@ namespace NeoCortexApiSample
                             Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
                             lastPredictedValues = new List<string>();
                         }
-                        for (int epoch = 0; epoch < numEpochs; epoch++)
+                       /* for (int epoch = 0; epoch < numEpochs; epoch++)
                         {
                             // Perform one epoch of training here
 
                             // Calculate the binary cross entropy loss
                             double loss = CalculateBinaryCrossEntropyLoss(actualSdrValues, predictedSdrValues);
                             Console.WriteLine($"Epoch {epoch + 1}/{numEpochs} - Loss: {loss}");
-                        }
+                        }*/
 
 
 
@@ -481,7 +481,7 @@ namespace NeoCortexApiSample
 
             return new Predictor(layer1, mem, cls);
         }
-        public double CalculateBinaryCrossEntropyLoss(double[] actualSDR, double[] predictedSDR)
+        /*public double CalculateBinaryCrossEntropyLoss(double[] actualSDR, double[] predictedSDR)
         {
             double loss = 0.0;
             for (int i = 0; i < actualSDR.Length; i++)
@@ -492,6 +492,29 @@ namespace NeoCortexApiSample
                 }
             }
             return loss / actualSDR.Length;
+        }*/
+        public class BinaryCrossEntropy
+        {
+            public static double Calculate(double[] predictedValues, double[] actualValues)
+            {
+                if (predictedValues.Length != actualValues.Length)
+                    throw new ArgumentException("Predicted and actual values arrays must have the same length.");
+
+                double sum = 0;
+
+                for (int i = 0; i < predictedValues.Length; i++)
+                {
+                    double predictedValue = predictedValues[i];
+                    double actualValue = actualValues[i];
+
+                    sum += actualValue * Math.Log(predictedValue) + (1 - actualValue) * Math.Log(1 - predictedValue);
+                }
+
+                double averageLoss = -sum / predictedValues.Length;
+                Console.WriteLine($"Loss: {averageLoss}");
+
+                return averageLoss;
+            }
         }
 
 
