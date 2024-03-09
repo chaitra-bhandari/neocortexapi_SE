@@ -45,14 +45,7 @@ namespace NeoCortexApiSample
 
                 }
 
-            //Print the ascii value
-            //Console.WriteLine("ASCII Sequence:");
-            //foreach (var item in inputValues)
-            //    {
-            //    Console.Write(item + " ");
-            //    }
-
-            //Define block size.
+           //Define block size.
             int block_size = 8;
 
             //Define batch size.
@@ -87,13 +80,7 @@ namespace NeoCortexApiSample
                     asciiVal.Add(c);
 
                     }
-                //foreach (var item in asciiVal)
-                //    {
-                //    Console.Write(item + " ");
-                //    }
-
-                //Thread.Sleep(1000);
-
+                
                 //Generate chatGPT model
                 predictor.Reset();
                 PredictNextElement(predictor, asciiVal);
@@ -106,17 +93,13 @@ namespace NeoCortexApiSample
 
             foreach (var item in myList)
                 {
-                //list <double> res = predictor.Predict(asciiValues);
+              
                 var res = predictor.Predict(item);
                 if (item == myList.First())
                     {
                     if (res.Count > 0)
                         {
-                        //foreach (var pred in res)
-                        //    {
-                        //    Debug.WriteLine($"{pred.PredictedInput} - {pred.Similarity}");
-                        //    }
-
+                        
                         var tokens = res.First().PredictedInput.Split('_');
 
                         var tokens2 = res.First().PredictedInput.Split('-');
