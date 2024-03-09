@@ -52,11 +52,7 @@ namespace NeoCortexApiSample
             int batch_size = 4;
 
             List<double> x = GetBatch(inputValues, block_size, batch_size);
-            //foreach (var item in x)
-            //    {
-            //    Console.Write(item + " ");
-            //    }
-
+            
             //Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
 
