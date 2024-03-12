@@ -481,7 +481,7 @@ namespace NeoCortexApiSample
 
             return new Predictor(layer1, mem, cls);
         }
-        /*public double CalculateBinaryCrossEntropyLoss(double[] actualSDR, double[] predictedSDR)
+        public double CalculateBinaryCrossEntropyLoss(double[] actualSDR, double[] predictedSDR)
         {
             double loss = 0.0;
             for (int i = 0; i < actualSDR.Length; i++)
@@ -492,8 +492,8 @@ namespace NeoCortexApiSample
                 }
             }
             return loss / actualSDR.Length;
-        }*/
-        public class BinaryCrossEntropy
+        }
+       /* public class BinaryCrossEntropy
         {
             public static double Calculate(double[] predictedValues, double[] actualValues)
             {
@@ -515,7 +515,7 @@ namespace NeoCortexApiSample
 
                 return averageLoss;
             }
-        }
+        }*/
 
 
 
