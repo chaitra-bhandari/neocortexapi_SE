@@ -182,7 +182,7 @@ namespace NeoCortexApiSample
             bool isLearningCompleted = false;
 
             //
-            // Now training with SP+TM. SP is pretrained on the given input pattern set.
+            // Now training with SP+TM. SP is pretrained on the given input pattern.
 
 
             foreach (var input1 in inputs)
@@ -331,7 +331,7 @@ namespace NeoCortexApiSample
             double loss = 0.0;
 
             // Retrieve the predicted probabilities from the classifier
-            double[] probabilities = classifier.GetPredictedProbabilities(target);
+            double[] probabilities = classifier.();
 
             // Assuming target is a binary value (0 or 1)
             int targetValue = Convert.ToInt32(target);
