@@ -1,4 +1,4 @@
-﻿using NeoCortexApi;
+using NeoCortexApi;
 using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
@@ -240,8 +240,36 @@ namespace NeoCortexApiSample
 
                         Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
                         Debug.WriteLine($"Cell SDR: {Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray())}");
+                        String SdrValues = Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray());
+                        // Split the input string by commas and remove any leading or trailing whitespace from each substring
+                        string[] substrings = SdrValues.Split(',')
+                                                       .Select(s => s.Trim())
+                                                       .ToArray();
 
+                        // Convert each substring to an integer and add it to a list
+                        List<int> intList = new List<int>();
+                        foreach (var substring in substrings)
+                            {
+                            if (int.TryParse(substring, out int intValue))
+                                {
+                                intList.Add(intValue);
+                                }
+                            else
+                                {
+                               // Console.WriteLine($"Error: Unable to parse '{substring}' as an integer.");
+                                // Handle the error or continue with other substrings
+                                }
+                            }
+
+                        //Console.Write($"intList of SDR values is ");
+                        //foreach ( var item in intList)
+                        //    {
+                        //    Console.Write(item + " ");
+
+                        //    }
                         //
+
+
                         // If the list of predicted values from the previous step contains the currently presenting value,
                         // we have a match.
 
@@ -257,12 +285,50 @@ namespace NeoCortexApiSample
                         if (lyrOut.PredictiveCells.Count > 0)
                             {
                             //var predictedInputValue = cls.GetPredictedInputValue(lyrOut.PredictiveCells.ToArray());
-                            var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
+                            var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 7);
                             Console.WriteLine($"predictedInputValues : {predictedInputValues}");
-                           
+
                             foreach (var item in predictedInputValues)
                                 {
-                                Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
+                                Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}  ");
+
+
+
+                                String predictive_cells = item.BestMatchString;
+
+                                //Console.WriteLine($"predictive_cells : {item.BestMatchString}");
+
+                                string[] substrings1 = predictive_cells.Split(',')
+                                                       .Select(s => s.Trim())
+                                                       .ToArray();
+
+                                // Convert each substring to an integer and add it to a list
+                                List<int> intList1 = new List<int>();
+
+                                foreach (var substring in substrings1)
+                                    {
+                                    if (int.TryParse(substring, out int intValue))
+                                        {
+                                        intList1.Add(intValue);
+                                        }
+                                    else
+                                        {
+                                      //  Console.WriteLine($"Error: Unable to parse '{substring}' as an integer.");
+                                        // Handle the error or continue with other substrings
+                                        }
+                                    }
+                                List<List<int>> predictedSets = new List<List<int>> { intList1 };
+
+                               // predictedSets.Add(intList1);
+                                int threshold = 50; // Adjust threshold as needed
+
+                                for (int j = 0; j < predictedSets.Count; j++)
+                                    {
+                                    double bce = CalculateBinaryCrossEntropy(intList, predictedSets[j], threshold);
+
+                                    Console.WriteLine($"Binary Cross-Entropy for Set {j + 1}: {bce}");
+                                    }
+
                                 }
 
                             lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
@@ -278,12 +344,34 @@ namespace NeoCortexApiSample
 
                         }
 
+                     // Calculate binary cross entropy
+                     static double CalculateBinaryCrossEntropy(List<int> actualOutputs, List<int> predictedValues, int threshold)
+                        {
+                        // Determine correctness based on threshold
+                        var correctness = actualOutputs.Zip(predictedValues, (actual, pred) => Math.Abs(actual - pred) <= threshold ? 1 : 0).ToList();
+
+                        // Compute binary cross-entropy
+                        double bce = CalculateBinaryCrossEntropy1(correctness);
+                        return bce;
+                        }
+
+                      static double CalculateBinaryCrossEntropy1(List<int> correctness)
+                        {
+                        // Compute binary cross-entropy
+                        double bce = 0;
+                        foreach (var c in correctness)
+                            {
+                            bce += c == 1 ? 0 : 1;
+                            }
+                        return bce / correctness.Count;
+                        }
+
                     // The first element (a single element) in the sequence cannot be predicted
                     double maxPossibleAccuraccy = (double)((double)inputValues.Count() - 1) / (double)inputValues.Count() * 100.0;
 
                     double accuracy = (double)matches / (double)inputValues.Count() * 100.0;
-                    
-                    
+
+
                     Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {inputValues.Count()}\t {accuracy}%");
 
                     if (accuracy >= maxPossibleAccuraccy)
@@ -320,9 +408,6 @@ namespace NeoCortexApiSample
 
             return new Predictor(layer1, mem, cls);
             }
-
-
-
 
         /// <summary>
         /// Constracts the unique key of the element of an sequece. This key is used as input for HtmClassifier.
