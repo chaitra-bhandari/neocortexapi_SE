@@ -11,9 +11,13 @@ This project implements a new method __RunLanguageSemanticExperiment()__ for lea
 # Getting Started
 
 ## Processing input data
-The input file of a very long text sequence is converted into a list of ASCII characters by removing all the control characters like \r, \n, \t, etc.
+Input data processing involves transforming a lengthy text file sequence into a list of ASCII characters, achieved by excluding control characters such as \r, \n, \t, etc.
 
+ ```csharp
+
+      
       List<double> inputValues = new List<double>();
+      //input text file path
       string filePath = @"filename.txt";
       List<char> charList = ReadFileAndConvertToCharList(filePath);
 
@@ -57,3 +61,27 @@ The input file of a very long text sequence is converted into a list of ASCII ch
          }
        return charList;
      }
+```
+
+## Generate an overlapping sequence of input data
+ The provided code returns an overlapping sequence, where each 8-character segment overlaps by 4 characters with the adjacent segments.
+ ```csharp
+
+  static List<double> SplitIntoBatches(List<double> numbers, int batchSize, int overlap)
+            {
+
+            List<double> overlappingSequence = new List<double>();
+
+            for (int i = 0; i < numbers.Count - 8; i += 4) // Increment by 4
+                {
+                List<double> sequence = numbers.GetRange(i, 8);
+                overlappingSequence.AddRange(sequence);
+                }
+
+            return overlappingSequence;
+
+            }
+```
+           
+       
+
