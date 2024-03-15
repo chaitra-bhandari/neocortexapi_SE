@@ -318,14 +318,14 @@ namespace NeoCortexApiSample
                             Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
                             lastPredictedValues = new List<string>();
                         }
-                       /* for (int epoch = 0; epoch < numEpochs; epoch++)
+                        for (int epoch = 0; epoch < numEpochs; epoch++)
                         {
                             // Perform one epoch of training here
 
                             // Calculate the binary cross entropy loss
                             double loss = CalculateBinaryCrossEntropyLoss(actualSdrValues, predictedSdrValues);
                             Console.WriteLine($"Epoch {epoch + 1}/{numEpochs} - Loss: {loss}");
-                        }*/
+                        }
 
 
 
