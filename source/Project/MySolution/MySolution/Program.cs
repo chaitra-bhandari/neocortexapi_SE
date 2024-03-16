@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Collections;
+using System.Numerics;
 //using static NeoCortexApi.Utility.GroupBy2<R>;
 
 namespace NeoCortexApiSample
@@ -12,13 +14,10 @@ namespace NeoCortexApiSample
     class Program
 
     {
-
-
         static void Main(string[] args)
         {
             RunMultiSequenceLearningExperiment();
         }
-
         /// <summary>
         /// This example demonstrates how to learn sequences and how to use the prediction mechanism.
         /// First,string is converted into an array of characters, and asciii value of each character is stored in a list.
@@ -28,8 +27,8 @@ namespace NeoCortexApiSample
         /// </summary>
         private static void RunMultiSequenceLearningExperiment()
         {
-            List<double> inputValues = new List<double>();
 
+            List<double> inputValues = new List<double>();
 
             //Path to the input text file.
             string filePath = @"filename.txt";
@@ -46,16 +45,6 @@ namespace NeoCortexApiSample
 
             }
 
-            //Print the ascii value
-            Console.WriteLine("ASCII Sequence:");
-            foreach (var item in inputValues)
-            {
-                Console.Write(item + " ");
-            }
-
-
-            //Call a method to devide the inpit values as batches
-
             //Define block size.
             int block_size = 8;
 
@@ -63,75 +52,36 @@ namespace NeoCortexApiSample
             int batch_size = 4;
 
             List<double> x = GetBatch(inputValues, block_size, batch_size);
-            foreach (var item in x)
-            {
-                Console.Write(item + " ");
-            }
 
-
-
-
-
-            //Prototype for building the prediction engine.}
+            //Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
 
+            for (int i = 0; i < 24; i += block_size)
+
             {
+                List<double> chunk = x.GetRange(i, block_size);
 
+                var predictor = experiment.Run(chunk);
 
+                Console.Write("Ask Question: ");
 
+                // Read the user's input from the console
+                string inputText = Console.ReadLine();
 
+                List<double> asciiVal = new List<double>();
 
-
-                for (int i = 0; i < x.Count; i += block_size)
+                foreach (char c in inputText)
                 {
-                    List<double> chunk = x.GetRange(i, block_size);
 
-
-                    Console.WriteLine("Batch:");
-                    foreach (var item in chunk)
-                    {
-                        Console.Write(item + " ");
-                    }
-
-
-                    var predictor = experiment.Run(chunk);
-                    int n = x.Count;
-                    if (n < 32)
-                    {
-                        continue;
-                    }
-
-
-
-                    Console.Write("Ask Question: ");
-
-                    // Read the user's input from the console
-                    string inputText = Console.ReadLine();
-
-                    List<double> asciiVal = new List<double>();
-
-                    foreach (char c in inputText)
-                    {
-                        asciiVal.Add((double)c);
-                    }
-
-
-
-                    //Generate chatGPT model
-                    PredictNextElement(predictor, asciiVal);
-
+                    asciiVal.Add(c);
 
                 }
 
-
-
+                //Generate chatGPT model
+                predictor.Reset();
+                PredictNextElement(predictor, asciiVal);
             }
-
-
-
-
         }
-
 
         public static void PredictNextElement(Predictor predictor, List<double> myList)
         {
@@ -139,16 +89,12 @@ namespace NeoCortexApiSample
 
             foreach (var item in myList)
             {
-                //list <double> res = predictor.Predict(asciiValues);
+
                 var res = predictor.Predict(item);
                 if (item == myList.First())
                 {
                     if (res.Count > 0)
                     {
-                        //foreach (var pred in res)
-                        //    {
-                        //    Debug.WriteLine($"{pred.PredictedInput} - {pred.Similarity}");
-                        //    }
 
                         var tokens = res.First().PredictedInput.Split('_');
 
@@ -159,12 +105,8 @@ namespace NeoCortexApiSample
                         var tokens3 = tokens2.Last();
 
                         Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens3.Last()}");
-                        Console.WriteLine("logLoss");
 
-                        //List<double> responseSequence = new List<double>(asciiValues);
-
-                        //responseSequence.Add(tokens3.Last());
-
+                        //Split a string into an array of substrings
                         string[] parts = tokens[0].Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
 
                         // Create a list to store the double values
@@ -176,9 +118,6 @@ namespace NeoCortexApiSample
                             double value = double.Parse(part);
                             doubleList.Add(value);
                         }
-                        //List<double> responseSequence = new List<double>(Array.ConvertAll(tokens[0].Split(' - '), double.Parse));
-
-
                         string generatedResponse = DecodeNumericalSequence(doubleList);
 
                         Console.WriteLine("Generated Response: " + generatedResponse); ;
@@ -187,13 +126,12 @@ namespace NeoCortexApiSample
                 else
                     Debug.WriteLine("Nothing predicted :( ");
                 //}
-
-
                 Debug.WriteLine("------------------------------");
 
                 static string DecodeNumericalSequence(List<double> generatedTokens)
                 {
                     // Decode generated tokens to characters
+
                     string decodedString = "";
                     foreach (int token in generatedTokens)
                     {
@@ -203,8 +141,10 @@ namespace NeoCortexApiSample
                 }
             }
         }
+
         //Function to read the file and return  char array.
         public static List<char> ReadFileAndConvertToCharList(string filePath)
+
         {
             List<char> charList = new List<char>();
 
@@ -262,10 +202,9 @@ namespace NeoCortexApiSample
                 }
 
             }
+
             Console.WriteLine($"totalDataSize: {totalDataSize}");
             int dataSize = data.Count;
-            Console.WriteLine($"DataSize: {dataSize}");
-            Console.WriteLine($"block_size: {block_size}");
             List<double> x = new List<double>();
 
             for (int i = 0; i < batch_size; i++)
@@ -279,12 +218,22 @@ namespace NeoCortexApiSample
 
             return x;
         }
-
-
-
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
