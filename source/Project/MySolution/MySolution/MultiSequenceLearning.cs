@@ -3,8 +3,10 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
+using ScottPlot.Drawing.Colormaps;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 
@@ -181,7 +183,9 @@ namespace NeoCortexApiSample
             // Set on true if the system has learned the sequence with a maximum acurracy.
             bool isLearningCompleted = false;
 
-            //
+            double leastBCE = 1.0;
+            double totalBCE = 0.0;
+            double bce=0.0;
             // Now training with SP+TM. SP is pretrained on the given input pattern set.
             foreach (var input1 in inputs)
                 {
@@ -261,18 +265,17 @@ namespace NeoCortexApiSample
                                 }
                             }
 
-                        //Console.Write($"intList of SDR values is ");
-                        //foreach ( var item in intList)
-                        //    {
-                        //    Console.Write(item + " ");
+                        Console.Write($"intList of SDR values is ");
+                        foreach (var item in intList)
+                            {
+                            Console.Write(item + " ");
 
-                        //    }
-                        //
+                            }
+
 
 
                         // If the list of predicted values from the previous step contains the currently presenting value,
                         // we have a match.
-
 
                         if (lastPredictedValues.Contains(key))
                             {
@@ -286,17 +289,15 @@ namespace NeoCortexApiSample
                             {
                             //var predictedInputValue = cls.GetPredictedInputValue(lyrOut.PredictiveCells.ToArray());
                             var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 7);
-                            Console.WriteLine($"predictedInputValues : {predictedInputValues}");
-
+                            Debug.WriteLine($"predictedInputValues : {predictedInputValues.Count}");
+                            
                             foreach (var item in predictedInputValues)
                                 {
-                                Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}  ");
+                                Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity} \t| BestMatching:{item.BestMatchString} ");
 
 
-
+                                //Extracting predictive_cells values 
                                 String predictive_cells = item.BestMatchString;
-
-                                //Console.WriteLine($"predictive_cells : {item.BestMatchString}");
 
                                 string[] substrings1 = predictive_cells.Split(',')
                                                        .Select(s => s.Trim())
@@ -305,31 +306,50 @@ namespace NeoCortexApiSample
                                 // Convert each substring to an integer and add it to a list
                                 List<int> intList1 = new List<int>();
 
+                             
                                 foreach (var substring in substrings1)
                                     {
                                     if (int.TryParse(substring, out int intValue))
                                         {
                                         intList1.Add(intValue);
                                         }
-                                    else
-                                        {
-                                      //  Console.WriteLine($"Error: Unable to parse '{substring}' as an integer.");
-                                        // Handle the error or continue with other substrings
-                                        }
+                                    
                                     }
+
+                                // Debug.WriteLine($"The total count of intList1 is {intList1.Count}");
+
                                 List<List<int>> predictedSets = new List<List<int>> { intList1 };
 
-                               // predictedSets.Add(intList1);
-                                int threshold = 50; // Adjust threshold as needed
+                               
+                                // predictedSets.Add(intList1);
+                                // int threshold = 10; // Adjust threshold as needed
+                                int threshold = 15; 
 
                                 for (int j = 0; j < predictedSets.Count; j++)
                                     {
-                                    double bce = CalculateBinaryCrossEntropy(intList, predictedSets[j], threshold);
+                                     bce = CalculateBinaryCrossEntropy(intList, predictedSets[j], threshold);
 
-                                    Console.WriteLine($"Binary Cross-Entropy for Set {j + 1}: {bce}");
+
+
+                                    if (bce > 0 && bce < leastBCE)
+                                        {
+                                        leastBCE = bce;
+                                        }
+
+
+                                    Debug.WriteLine($"Binary Cross-Entropy for Set {j + 1}: {bce}");
+
+                                    // Output BCE for the current set
+
+                                    //     Console.WriteLine($"least binary cross entropy : {leastBCE}");
+                                    //Debug.WriteLine($"The total count of predictive set is {predictedSets.Count}");
+
                                     }
-
                                 }
+                            
+
+
+                            Debug.WriteLine($"The leastBCE is {leastBCE}");
 
                             lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
 
@@ -342,20 +362,21 @@ namespace NeoCortexApiSample
                             lastPredictedValues = new List<string>();
                             }
 
-                        }
 
-                     // Calculate binary cross entropy
-                     static double CalculateBinaryCrossEntropy(List<int> actualOutputs, List<int> predictedValues, int threshold)
+                        }
+                      // Calculate binary cross entropy
+                      static double CalculateBinaryCrossEntropy(List<int> actualOutputs, List<int> predictedValues, int threshold)
                         {
                         // Determine correctness based on threshold
                         var correctness = actualOutputs.Zip(predictedValues, (actual, pred) => Math.Abs(actual - pred) <= threshold ? 1 : 0).ToList();
+
 
                         // Compute binary cross-entropy
                         double bce = CalculateBinaryCrossEntropy1(correctness);
                         return bce;
                         }
 
-                      static double CalculateBinaryCrossEntropy1(List<int> correctness)
+                    static double CalculateBinaryCrossEntropy1(List<int> correctness)
                         {
                         // Compute binary cross-entropy
                         double bce = 0;
@@ -366,20 +387,27 @@ namespace NeoCortexApiSample
                         return bce / correctness.Count;
                         }
 
-                    // The first element (a single element) in the sequence cannot be predicted
-                    double maxPossibleAccuraccy = (double)((double)inputValues.Count() - 1) / (double)inputValues.Count() * 100.0;
 
-                    double accuracy = (double)matches / (double)inputValues.Count() * 100.0;
+                        
 
+
+                   // The first element (a single element) in the sequence cannot be predicted
+                   // double maxPossibleAccuraccy = (double)((double)inputValues.Count() - 1) / (double)inputValues.Count() * 100.0;
+
+                 //  double maxPossibleAccuraccy = 80;
+                   //  double accuracy = (double)matches / (double)inputValues.Count() * 100.0;
+                    double accuracy = ( 1 - leastBCE)* 100.0;
+
+                  //  Console.WriteLine($"Accuracy: {accuracy * 100}%");
 
                     Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {inputValues.Count()}\t {accuracy}%");
 
-                    if (accuracy >= maxPossibleAccuraccy)
+                    if (accuracy >= 90)
                         {
                         maxMatchCnt++;
                         Debug.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
 
-                        //
+
                         // Experiment is completed if we are 30 cycles long at the 100% accuracy.
                         if (maxMatchCnt >= 30)
                             {
@@ -403,6 +431,8 @@ namespace NeoCortexApiSample
                     throw new Exception($"The system didn't learn with expected acurracy!");
 
                 }
+          
+          
 
             Debug.WriteLine("------------ END ------------");
 
@@ -434,3 +464,10 @@ namespace NeoCortexApiSample
             }
         }
     }
+
+
+
+
+
+
+
