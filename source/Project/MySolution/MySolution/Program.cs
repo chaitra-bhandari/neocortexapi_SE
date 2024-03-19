@@ -7,17 +7,19 @@ using System.Collections.Generic;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections;
 using System.Numerics;
+using System.Drawing;
 //using static NeoCortexApi.Utility.GroupBy2<R>;
 
 namespace NeoCortexApiSample
 {
-    class Program
+    public class Program
 
     {
         static void Main(string[] args)
         {
             RunMultiSequenceLearningExperiment();
         }
+
         /// <summary>
         /// This example demonstrates how to learn sequences and how to use the prediction mechanism.
         /// First,string is converted into an array of characters, and asciii value of each character is stored in a list.
@@ -29,15 +31,20 @@ namespace NeoCortexApiSample
         {
 
             List<double> inputValues = new List<double>();
+            List<double> testingData = new List<double>();
 
-            //Path to the input text file.
-            string filePath = @"filename.txt";
+            //Path to the input text file(Training data).
+            string filePathTrainData = @"filename.txt";
 
             //Call the function to read the file and convert to char array.
-            List<char> charList = ReadFileAndConvertToCharList(filePath);
+            List<char> charListOfTrainData = ReadFileAndConvertToCharList(filePathTrainData);
+
+            //Path to the input text file(Testin Data).
+            string filePathTestData = @"Testdata.txt";
+            List<char> charListOfTeatData = ReadFileAndConvertToCharList(filePathTestData);
 
             //Add asciiValue to a List 
-            foreach (char character in charList)
+            foreach (char character in charListOfTrainData)
             {
                 double asciiValue = (double)character;
 
@@ -45,24 +52,39 @@ namespace NeoCortexApiSample
 
             }
 
-            //Define block size.
-            int block_size = 8;
+            //Add asciiValue to a List 
+            foreach (char character in charListOfTeatData)
+            {
+                double asciiValue = (double)character;
 
-            //Define batch size.
-            int batch_size = 4;
+                testingData.Add(asciiValue);
 
-            List<double> x = GetBatch(inputValues, block_size, batch_size);
+            }
 
-            //Prototype for building the prediction engine.
+
+
             MultiSequenceLearning experiment = new MultiSequenceLearning();
 
-            for (int i = 0; i < 24; i += block_size)
+            // Define block size
+            int block_size = 8;
 
+            //Define overlaping charcters size.
+            int ovrlap = 4;
+
+
+            // Get the list of batches with overlapping starting from the 4th index
+            List<double> oberlappingSequence = SplitIntoBatches(inputValues, block_size, ovrlap);
+
+            for (int i = 0; i < oberlappingSequence.Count; i += 8)
             {
-                List<double> chunk = x.GetRange(i, block_size);
+                List<double> batch = oberlappingSequence.GetRange(i, 8);
 
-                var predictor = experiment.Run(chunk);
+                var predictor = experiment.Run(batch);
 
+                predictor.Reset();
+                PredictNextElement(predictor, testingData);
+
+                //In the commomd promt print as ask Question
                 Console.Write("Ask Question: ");
 
                 // Read the user's input from the console
@@ -74,12 +96,11 @@ namespace NeoCortexApiSample
                 {
 
                     asciiVal.Add(c);
-
                 }
-
-                //Generate chatGPT model
-                predictor.Reset();
                 PredictNextElement(predictor, asciiVal);
+
+
+
             }
         }
 
@@ -95,7 +116,6 @@ namespace NeoCortexApiSample
                 {
                     if (res.Count > 0)
                     {
-
                         var tokens = res.First().PredictedInput.Split('_');
 
                         var tokens2 = res.First().PredictedInput.Split('-');
@@ -125,13 +145,13 @@ namespace NeoCortexApiSample
                 }
                 else
                     Debug.WriteLine("Nothing predicted :( ");
-                //}
+
                 Debug.WriteLine("------------------------------");
 
                 static string DecodeNumericalSequence(List<double> generatedTokens)
                 {
-                    // Decode generated tokens to characters
 
+                    // Decode generated tokens to characters
                     string decodedString = "";
                     foreach (int token in generatedTokens)
                     {
@@ -182,45 +202,32 @@ namespace NeoCortexApiSample
             return charList;
         }
 
-        //Function to divide the input values to a set of batches
-        public static List<double> GetBatch(List<double> data, int block_size, int batch_size)
+        //Method divide the whole sequence into batch of 8 characters with overlapping of 4 charcters.
+        public static List<double> SplitIntoBatches(List<double> numbers, int batchSize, int overlap)
         {
-            Random random = new Random();
-            int totalDataSize = data.Count;
-            if (totalDataSize < block_size)
+
+            List<double> overlappingSequence = new List<double>();
+
+            for (int i = 0; i < numbers.Count - 8; i += 4) // Increment by 4
             {
-
-                {
-                    int paddingLength = 8 - totalDataSize;
-                    if (paddingLength > 0)
-                    {
-                        for (int i = 0; i < paddingLength; i++)
-                        {
-                            data.Add(0); // Add zeros at the end
-                        }
-                    }
-                }
-
+                List<double> sequence = numbers.GetRange(i, 8);
+                overlappingSequence.AddRange(sequence);
             }
 
-            Console.WriteLine($"totalDataSize: {totalDataSize}");
-            int dataSize = data.Count;
-            List<double> x = new List<double>();
+            return overlappingSequence;
 
-            for (int i = 0; i < batch_size; i++)
-            {
-                int startIndex = random.Next(dataSize - block_size);
-                for (int j = 0; j < block_size; j++)
-                {
-                    x.Add(data[startIndex + j]);
-                }
-            }
-
-            return x;
         }
     }
-
 }
+
+
+
+
+
+
+
+
+
 
 
 
