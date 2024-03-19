@@ -3,39 +3,34 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
+using ScottPlot.Drawing.Colormaps;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 
 
 namespace NeoCortexApiSample
-{
+    {
     /// <summary>
     /// Implements an experiment that demonstrates how to learn sequences.
     /// </summary>
     public class MultiSequenceLearning
-    {
+        {
         /// <summary>
         /// Runs the learning of sequences.
         /// </summary>
         /// <param name="sequences">Dictionary of sequences. KEY is the sewuence name, the VALUE is th elist of element of the sequence.</param>
-        private static object LossFunction;
-        private int numEpochs;
-        private double[] predictedSdrValues;
-        private double[] actualSdrValues;
-        private static readonly object testOutputArray;
-
         public Predictor Run(List<double> inputValues)
-        {
+            {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
 
             int inputBits = 100;
             int numColumns = 1024;
 
             HtmConfig cfg = new HtmConfig(new int[] { inputBits }, new int[] { numColumns })
-            {
+                {
                 Random = new ThreadSafeRandom(42),
 
                 CellsPerColumn = 25,
@@ -59,7 +54,7 @@ namespace NeoCortexApiSample
 
                 // Used by punishing of segments.
                 PredictedSegmentDecrement = 0.1
-            };
+                };
 
             //double max = 20;
             double max = 255;
@@ -77,18 +72,14 @@ namespace NeoCortexApiSample
 
             EncoderBase encoder = new ScalarEncoder(settings);
 
-
             return RunExperiment(inputBits, cfg, encoder, inputValues);
-        }
-
-
+            }
 
         /// <summary>
         ///
         /// </summary>
-        
         private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<double> inputValues)
-        {
+            {
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
@@ -105,7 +96,7 @@ namespace NeoCortexApiSample
             CortexLayer<object, object> layer1 = new CortexLayer<object, object>("L1");
 
             TemporalMemory tm = new TemporalMemory();
-           
+
             // For more information see following paper: https://www.scitepress.org/Papers/2021/103142/103142.pdf
             HomeostaticPlasticityController hpc = new HomeostaticPlasticityController(mem, numUniqueInputs * 150, (isStable, numPatterns, actColAvg, seenInputs) =>
             {
@@ -153,7 +144,7 @@ namespace NeoCortexApiSample
             //
 
             for (int i = 0; i < maxCycles && isInStableState == false; i++)
-            {
+                {
                 matches = 0;
 
                 cycle++;
@@ -162,19 +153,19 @@ namespace NeoCortexApiSample
 
 
                 foreach (var input in inputs)
-                {
+                    {
                     Debug.WriteLine($" -- {input} --");
 
                     var lyrOut = layer1.Compute(input, true);
 
                     if (isInStableState)
                         break;
-                }
+                    }
 
                 if (isInStableState)
                     break;
 
-            }
+                }
 
             // Clear all learned patterns in the classifier.
             cls.ClearState();
@@ -192,12 +183,14 @@ namespace NeoCortexApiSample
             // Set on true if the system has learned the sequence with a maximum acurracy.
             bool isLearningCompleted = false;
 
-            //
+            double leastBCE = 1.0;
+            double totalBCE = 0.0;
+            double bce=0.0;
             // Now training with SP+TM. SP is pretrained on the given input pattern set.
             foreach (var input1 in inputs)
-            {
-                for (int i = 0; i < maxCycles; i++)
                 {
+                for (int i = 0; i < maxCycles; i++)
+                    {
                     matches = 0;
 
                     cycle++;
@@ -208,7 +201,7 @@ namespace NeoCortexApiSample
 
 
                     foreach (var input in inputs)
-                    {
+                        {
                         Debug.WriteLine($"-------------- {input} ---------------");
 
                         // lyrOut is null when the TM is added to the layer inside of HPC callback by entering of the stable state.
@@ -239,286 +232,212 @@ namespace NeoCortexApiSample
                         List<Cell> actCells;
 
                         if (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count)
-                        {
+                            {
                             actCells = lyrOut.ActiveCells;
-                        }
+                            }
                         else
-                        {
+                            {
                             actCells = lyrOut.WinnerCells;
-                        }
+                            }
 
                         cls.Learn(key, actCells.ToArray());
 
                         Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
                         Debug.WriteLine($"Cell SDR: {Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray())}");
+                        String SdrValues = Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray());
+                        // Split the input string by commas and remove any leading or trailing whitespace from each substring
+                        string[] substrings = SdrValues.Split(',')
+                                                       .Select(s => s.Trim())
+                                                       .ToArray();
 
-                        //
+                        // Convert each substring to an integer and add it to a list
+                        List<int> intList = new List<int>();
+                        foreach (var substring in substrings)
+                            {
+                            if (int.TryParse(substring, out int intValue))
+                                {
+                                intList.Add(intValue);
+                                }
+                            else
+                                {
+                               // Console.WriteLine($"Error: Unable to parse '{substring}' as an integer.");
+                                // Handle the error or continue with other substrings
+                                }
+                            }
+
+                        Console.Write($"intList of SDR values is ");
+                        foreach (var item in intList)
+                            {
+                            Console.Write(item + " ");
+
+                            }
+
+
+
                         // If the list of predicted values from the previous step contains the currently presenting value,
                         // we have a match.
 
-
                         if (lastPredictedValues.Contains(key))
-                        {
+                            {
                             matches++;
                             Debug.WriteLine($"Match. Actual value: {key} - Predicted value: {lastPredictedValues.FirstOrDefault(key)}.");
-                        }
+                            }
                         else
                             Debug.WriteLine($"Missmatch! Actual value: {key} - Predicted values: {String.Join(',', lastPredictedValues)}");
 
                         if (lyrOut.PredictiveCells.Count > 0)
-                        {
+                            {
                             //var predictedInputValue = cls.GetPredictedInputValue(lyrOut.PredictiveCells.ToArray());
-                            var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
-                            Console.WriteLine($"predictedInputValues : {predictedInputValues}");
-                            /*double loss = BinaryCrossEntropyLoss(predictedProbabilities, actualLabels.ToArray());
-                            static double BinaryCrossEntropyLoss(double[] predictedProbabilities, double[] actualLabels)
-                            {
-                                if (predictedProbabilities.Length != actualLabels.Length)
-                                {
-                                    throw new ArgumentException("Predicted probabilities and actual labels must have the same length.");
-                                }
-
-                                double totalLoss = 0.0;
-                                for (int i = 0; i < predictedProbabilities.Length; i++)
-                                {
-                                    // Clip probabilities
-                                    double eps = 1e-7;
-                                    double clippedProbability = Math.Max(eps, Math.Min(1 - eps, predictedProbabilities[i]));
-
-                                    // Calculate binary cross-entropy loss
-                                    totalLoss -= (actualLabels[i] * Math.Log(clippedProbability) +
-                                                 (1 - actualLabels[i]) * Math.Log(1 - clippedProbability));
-                                }
-
-                                return totalLoss / predictedProbabilities.Length;  // Average loss across sequence
-                            }
-                            // Update network weights based on loss (replace with your optimizer)
-                            UpdateWeights(loss, networkParameters);
-                            // Replace this with your specific weight update function based on your chosen optimizer (e.g., gradient descent)
-                             void UpdateWeights(double loss, double[] networkParameters)
-                            {
-                                // Implement weight update logic based on the loss and optimizer algorithm
-                                throw new NotImplementedException("Weight update function not implemented. Replace with your optimizer logic.");
-                            }*/
-
-
-
+                            var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 7);
+                            Debug.WriteLine($"predictedInputValues : {predictedInputValues.Count}");
+                            
                             foreach (var item in predictedInputValues)
-                            {
-                                Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
-                            }
+                                {
+                                Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity} \t| BestMatching:{item.BestMatchString} ");
+
+
+                                //Extracting predictive_cells values 
+                                String predictive_cells = item.BestMatchString;
+
+                                string[] substrings1 = predictive_cells.Split(',')
+                                                       .Select(s => s.Trim())
+                                                       .ToArray();
+
+                                // Convert each substring to an integer and add it to a list
+                                List<int> intList1 = new List<int>();
+
+                             
+                                foreach (var substring in substrings1)
+                                    {
+                                    if (int.TryParse(substring, out int intValue))
+                                        {
+                                        intList1.Add(intValue);
+                                        }
+                                    
+                                    }
+
+                                // Debug.WriteLine($"The total count of intList1 is {intList1.Count}");
+
+                                List<List<int>> predictedSets = new List<List<int>> { intList1 };
+
+                               
+                                // predictedSets.Add(intList1);
+                                // int threshold = 10; // Adjust threshold as needed
+                                int threshold = 15; 
+
+                                for (int j = 0; j < predictedSets.Count; j++)
+                                    {
+                                     bce = CalculateBinaryCrossEntropy(intList, predictedSets[j], threshold);
+
+
+
+                                    if (bce > 0 && bce < leastBCE)
+                                        {
+                                        leastBCE = bce;
+                                        }
+
+
+                                    Debug.WriteLine($"Binary Cross-Entropy for Set {j + 1}: {bce}");
+
+                                    // Output BCE for the current set
+
+                                    //     Console.WriteLine($"least binary cross entropy : {leastBCE}");
+                                    //Debug.WriteLine($"The total count of predictive set is {predictedSets.Count}");
+
+                                    }
+                                }
+                            
+
+
+                            Debug.WriteLine($"The leastBCE is {leastBCE}");
 
                             lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
 
                             Console.WriteLine($"The lastpredicted values : {lastPredictedValues}");
 
-                        }
+                            }
                         else
-                        {
+                            {
                             Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
                             lastPredictedValues = new List<string>();
+                            }
+
+
                         }
-                        for (int epoch = 0; epoch < numEpochs; epoch++)
+                      // Calculate binary cross entropy
+                      static double CalculateBinaryCrossEntropy(List<int> actualOutputs, List<int> predictedValues, int threshold)
                         {
-                            // Perform one epoch of training here
+                        // Determine correctness based on threshold
+                        var correctness = actualOutputs.Zip(predictedValues, (actual, pred) => Math.Abs(actual - pred) <= threshold ? 1 : 0).ToList();
 
-                            // Calculate the binary cross entropy loss
-                            double loss = CalculateBinaryCrossEntropyLoss(actualSdrValues, predictedSdrValues);
-                            Console.WriteLine($"Epoch {epoch + 1}/{numEpochs} - Loss: {loss}");
+
+                        // Compute binary cross-entropy
+                        double bce = CalculateBinaryCrossEntropy1(correctness);
+                        return bce;
+                        }
+
+                    static double CalculateBinaryCrossEntropy1(List<int> correctness)
+                        {
+                        // Compute binary cross-entropy
+                        double bce = 0;
+                        foreach (var c in correctness)
+                            {
+                            bce += c == 1 ? 0 : 1;
+                            }
+                        return bce / correctness.Count;
                         }
 
 
+                        
 
-                    }
 
-                    // The first element (a single element) in the sequence cannot be predicted
-                    double maxPossibleAccuraccy = (double)((double)inputValues.Count() - 1) / (double)inputValues.Count() * 100.0;
+                   // The first element (a single element) in the sequence cannot be predicted
+                   // double maxPossibleAccuraccy = (double)((double)inputValues.Count() - 1) / (double)inputValues.Count() * 100.0;
 
-                    double accuracy = (double)matches / (double)inputValues.Count() * 100.0;
+                 //  double maxPossibleAccuraccy = 80;
+                   //  double accuracy = (double)matches / (double)inputValues.Count() * 100.0;
+                    double accuracy = ( 1 - leastBCE)* 100.0;
 
+                  //  Console.WriteLine($"Accuracy: {accuracy * 100}%");
 
                     Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {inputValues.Count()}\t {accuracy}%");
 
-                    if (accuracy >= maxPossibleAccuraccy)
-                    {
+                    if (accuracy >= 90)
+                        {
                         maxMatchCnt++;
                         Debug.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
 
-                        //
+
                         // Experiment is completed if we are 30 cycles long at the 100% accuracy.
                         if (maxMatchCnt >= 30)
-                        {
+                            {
                             sw.Stop();
                             Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {inputValues} learning time: {sw.Elapsed}.");
                             isLearningCompleted = true;
                             break;
+                            }
                         }
-                    }
                     else if (maxMatchCnt > 0)
-                    {
+                        {
                         Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
                         maxMatchCnt = 0;
-                    }
+                        }
 
                     // This resets the learned state, so the first element starts allways from the beginning.
                     tm.Reset(mem);
-                }
-
-                /* double BinaryCrossEntropy(List<double> predictedValues, List<double> actualValues)
-                 {
-                     double sumLoss = 0.0;
-
-                     // Ensure both lists have the same length
-                     if (predictedValues.Count != actualValues.Count)
-                         throw new ArgumentException("Predicted values and actual values must have the same length.");
-
-                     // Calculate binary cross-entropy loss for each predicted-actual pair
-                     for (int i = 0; i < predictedValues.Count; i++)
-                     {
-                         double predicted = predictedValues[i];
-                         double actual = actualValues[i];
-
-                         // Ensure the predicted value is within a valid range (e.g., [0, 1])
-                         predicted = Math.Max(1e-15, Math.Min(1 - 1e-15, predicted));
-
-                         // Calculate binary cross-entropy loss for this pair
-                         double loss = -((actual * Math.Log(predicted)) + ((1 - actual) * Math.Log(1 - predicted)));
-
-                         sumLoss += loss;
-                     }
-
-                     // Average the loss over all predicted-actual pairs
-                     double averageLoss = sumLoss / predictedValues.Count;
-
-                     return averageLoss;
-                 }*/
-
-                /*  /// <summary>
-                  /// Runs the learning of sequences.
-                  /// </summary>
-                  /// <param name="inputValues">List of input values.</param>
-                  /// <returns>The predictor object.</returns>
-                 // Predictor Run(List<double> inputValues)
-
-
-
-                      // Initialize a list to store predicted values
-                      List<double> predictedValues = new List<double>();
-
-                      // Initialize a list to store actual (true) values
-                      List<double> actualValues = new List<double>();
-
-                      // Training loop
-                      foreach (var input in inputs)
-                      {
-                          // Forward pass: Compute predictions
-                          var prediction = layer1.Compute(input, true);
-
-                          // Update predicted values list
-                          predictedValues.Add(-1);
-
-                          // Update actual values list (you need to provide actual values)
-                          actualValues.Add(50);
-                      }
-
-                      // Calculate binary cross-entropy loss
-                      double loss = BinaryCrossEntropy(predictedValues, actualValues);
-
-                      // Log the loss or use it for further processing
-                      Debug.WriteLine($"Binary Cross-Entropy Loss: {loss}");*/
-
-              /*  // Method to calculate binary cross entropy loss
-                static double BinaryCrossEntropy(List<double> yTrue, List<double> yPred)
-                {
-                    if (yTrue.Count != yPred.Count)
-                    {
-                        throw new ArgumentException("The number of elements in yTrue and yPred must be the same.");
                     }
-
-                    double totalLoss = 0.0;
-
-                    for (int i = 0; i < yTrue.Count; i++)
-                    {
-                        totalLoss += -(yTrue[i] * Math.Log(yPred[i]) + (1 - yTrue[i]) * Math.Log(1 - yPred[i]));
-                    }
-
-                    // Average loss over all samples
-                    double averageLoss = totalLoss / yTrue.Count;
-
-                    return averageLoss;
-
-
-
-                }
-                // Example usage
-                static void Entropy(string[] args)
-                {
-                    // Example lists of true and predicted values
-                    List<double> yTrue = new List<double> { 1, 0, 1, 0, 1 };
-                    List<double> yPred = new List<double> { 0.9, 0.2, 0.8, 0.1, 0.7 };
-
-                    // Calculate binary cross entropy loss
-                    double loss = BinaryCrossEntropy(yTrue, yPred);
-
-                    Console.WriteLine("Binary Cross Entropy Loss: " + loss);
-                }*/
-
-
-
-
-
-
-
-
-
 
                 if (isLearningCompleted == false)
                     throw new Exception($"The system didn't learn with expected acurracy!");
 
-            }
+                }
+          
+          
 
             Debug.WriteLine("------------ END ------------");
 
             return new Predictor(layer1, mem, cls);
-        }
-        public double CalculateBinaryCrossEntropyLoss(double[] actualSDR, double[] predictedSDR)
-        {
-            double loss = 0.0;
-            for (int i = 0; i < actualSDR.Length; i++)
-            {
-                if (actualSDR[i] > 0)
-                {
-                    loss += -Math.Log(predictedSDR[i]);
-                }
             }
-            return loss / actualSDR.Length;
-        }
-       /* public class BinaryCrossEntropy
-        {
-            public static double Calculate(double[] predictedValues, double[] actualValues)
-            {
-                if (predictedValues.Length != actualValues.Length)
-                    throw new ArgumentException("Predicted and actual values arrays must have the same length.");
-
-                double sum = 0;
-
-                for (int i = 0; i < predictedValues.Length; i++)
-                {
-                    double predictedValue = predictedValues[i];
-                    double actualValue = actualValues[i];
-
-                    sum += actualValue * Math.Log(predictedValue) + (1 - actualValue) * Math.Log(1 - predictedValue);
-                }
-
-                double averageLoss = -sum / predictedValues.Length;
-                Console.WriteLine($"Loss: {averageLoss}");
-
-                return averageLoss;
-            }
-        }*/
-
-
-
 
         /// <summary>
         /// Constracts the unique key of the element of an sequece. This key is used as input for HtmClassifier.
@@ -530,18 +449,24 @@ namespace NeoCortexApiSample
         /// <param name="sequence"></param>
         /// <returns></returns>
         private static string GetKey(List<string> prevInputs, double input)
-        {
+            {
             string key = String.Empty;
 
             for (int i = 0; i < prevInputs.Count; i++)
-            {
+                {
                 if (i > 0)
                     key += "-";
 
                 key += (prevInputs[i]);
-            }
+                }
 
             return key;
+            }
         }
     }
-}
+
+
+
+
+
+
