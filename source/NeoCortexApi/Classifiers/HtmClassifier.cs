@@ -31,6 +31,9 @@ namespace NeoCortexApi.Classifiers
         /// The similarity between the SDR of  predicted cell set with the SDR of the input.
         /// </summary>
         public double Similarity { get; set; }
+
+
+        public string BestMatchString { get; set; }
     }
 
 
@@ -99,7 +102,7 @@ namespace NeoCortexApi.Classifiers
                     bestSdr = sdr;
                 }
             }
-            
+
             similarity = Math.Round(MathHelpers.CalcArraySimilarity(bestSdr, cellIndicies), 2);
 
             return maxSameBits;
@@ -198,7 +201,9 @@ namespace NeoCortexApi.Classifiers
                     {
                         Debug.WriteLine($">indx:{n.ToString("D3")}\tinp/len: {pair.Key}/{cellIndicies.Length}, Same Bits = {cellIndicies.Length.ToString("D3")}\t, Similarity 100.00 %\t {Helpers.StringifyVector(cellIndicies)}");
 
-                        res.Add(new ClassifierResult<TIN> { PredictedInput = pair.Key, Similarity = (float)100.0, NumOfSameBits = cellIndicies.Length });
+                        res.Add(new ClassifierResult<TIN> { PredictedInput = pair.Key, Similarity = (float)100.0, NumOfSameBits = cellIndicies.Length, BestMatchString = Helpers.StringifyVector(cellIndicies) });
+
+
                     }
                     else
                     {
@@ -209,7 +214,7 @@ namespace NeoCortexApi.Classifiers
                         int[] bestMatch;
                         var numOfSameBitsPct = GetBestMatch(pair.Key, cellIndicies, out similarity, out bestMatch);// pair.Value.Intersect(cellIndicies).Count();
                         //double simPercentage = Math.Round(MathHelpers.CalcArraySimilarity(pair.Value, cellIndicies), 2);
-                        dict.Add(pair.Key, new ClassifierResult<TIN> { PredictedInput = pair.Key, NumOfSameBits = numOfSameBitsPct, Similarity = similarity });
+                        dict.Add(pair.Key, new ClassifierResult<TIN> { PredictedInput = pair.Key, NumOfSameBits = numOfSameBitsPct, Similarity = similarity, BestMatchString = Helpers.StringifyVector(bestMatch) });
                         predictedList.Add(new KeyValuePair<double, string>(similarity, pair.Key.ToString()));
 
                         if (numOfSameBitsPct > maxSameBits)
@@ -236,6 +241,88 @@ namespace NeoCortexApi.Classifiers
 
             return res;
         }
+        //   public List<ClassifierResult<TIN>> GetPredictedInputValues(int[] cellIndicies, short howMany = 1)
+
+        //public List<ClassifierResult<TIN>> YourMethodNameHere()
+        //{
+        //List<ClassifierResult<TIN>> res = new List<ClassifierResult<TIN>>();
+        //double maxSameBits = 0;
+        //TIN predictedValue = default;
+        //Dictionary<TIN, ClassifierResult<TIN>> dict = new Dictionary<TIN, ClassifierResult<TIN>>();
+
+        //var predictedList = new List<KeyValuePair<double, string>>();
+        //if (cellIndicies.Length != 0)
+        //    {
+        //    int indxOfMatchingInp = 0;
+        //    Debug.WriteLine($"Item length: {cellIndicies.Length}\t Items: {this.m_AllInputs.Keys.Count}");
+        //    int n = 0;
+
+        //    List<int> sortedMatches = new List<int>();
+        //    List<string> bestMatches = new List<string>();
+
+        //    Debug.WriteLine($"Predictive cells: {cellIndicies.Length} \t {Helpers.StringifyVector(cellIndicies)}");
+
+        //    foreach (var pair in this.m_AllInputs)
+        //        {
+        //        if (ContainsSdr(pair.Key, cellIndicies))
+        //            {
+        //            Debug.WriteLine($">indx:{n.ToString("D3")}\tinp/len: {pair.Key}/{cellIndicies.Length}, Same Bits = {cellIndicies.Length.ToString("D3")}\t, Similarity 100.00 %\t {Helpers.StringifyVector(cellIndicies)}");
+
+        //            res.Add(new ClassifierResult<TIN> { PredictedInput = pair.Key, Similarity = (float)100.0, NumOfSameBits = cellIndicies.Length });
+
+        //            }
+        //        else
+        //            {
+        //            double similarity;
+        //            int[] bestMatch;
+        //            var numOfSameBitsPct = GetBestMatch(pair.Key, cellIndicies, out similarity, out bestMatch);
+        //            dict.Add(pair.Key, new ClassifierResult<TIN> { PredictedInput = pair.Key, NumOfSameBits = numOfSameBitsPct, Similarity = similarity});
+        //            predictedList.Add(new KeyValuePair<double, string>(similarity, pair.Key.ToString()));
+        //            bestMatches.Add(Helpers.StringifyVector(bestMatch));
+
+        //            if (numOfSameBitsPct > maxSameBits)
+        //                {
+        //                Debug.WriteLine($">indx:{n.ToString("D3")}\tinp/len: {pair.Key}/{bestMatch.Length}, Same Bits = {numOfSameBitsPct.ToString("D3")}\t, Similarity {similarity.ToString("000.00")} % \t {Helpers.StringifyVector(bestMatch)}");
+        //                maxSameBits = numOfSameBitsPct;
+        //                predictedValue = pair.Key;
+        //                indxOfMatchingInp = n;
+        //                }
+        //            else
+        //                Debug.WriteLine($"<indx:{n.ToString("D3")}\tinp/len: {pair.Key}/{bestMatch.Length}, Same Bits = {numOfSameBitsPct.ToString("D3")}\t, Similarity {similarity.ToString("000.00")} %\t {Helpers.StringifyVector(bestMatch)}");
+        //            }
+        //        n++;
+        //        }
+        //    }
+
+        //int cnt = 0;
+        //foreach (var keyPair in dict.Values.OrderByDescending(key => key.Similarity))
+        //    {
+        //    res.Add(keyPair);
+        //    if (++cnt >= howMany)
+        //        break;
+        //    }
+
+        //// Retrieve values from bestMatch for the entry with the highest similarity
+
+        //foreach (var highestSimilarityEntry in dict.Values.OrderByDescending(key => key.Similarity))
+        //    {
+        //    if (highestSimilarityEntry != null)
+        //        {
+        //        int[] bestMatch1;
+        //        var bits = GetBestMatch(highestSimilarityEntry.PredictedInput, cellIndicies, out double similarity, out bestMatch1);
+        //        string bestMatchString = Helpers.StringifyVector(bestMatch1);
+        // res.Add(new ClassifierResult<TIN> { PredictedInput = pair.Key, Similarity = (float)100.0, NumOfSameBits = cellIndicies.Length } });
+        //        }
+        //    }
+        //    return res;
+        //    }
+
+        //}
+
+
+
+
+
 
 
 
@@ -419,7 +506,7 @@ namespace NeoCortexApi.Classifiers
                 StreamWriter sw = null;
 
                 if (fileName != null)
-                    sw = new StreamWriter(fileName.Replace(".csv", $"_Digit_{item}.csv"));
+                    sw = new StreamWriter(fileName.Replace(".csv", $"Digit{item}.csv"));
 
                 Debug.WriteLine("");
                 Debug.WriteLine($"{item}");
@@ -547,7 +634,7 @@ namespace NeoCortexApi.Classifiers
         /// <returns></returns>
         public double[,] TraceAutoSimilarity(TIN label, bool visualize = false)
         {
-            return TraceCrossSimilarity(label,label, visualize);
+            return TraceCrossSimilarity(label, label, visualize);
         }
 
         /// <summary>
@@ -563,11 +650,11 @@ namespace NeoCortexApi.Classifiers
             double minVal = 1000;
             double sum = 0;
             double count = 0;
-            for (int i = 0; i < correlationMat2D.GetLength(0);i+=1)
+            for (int i = 0; i < correlationMat2D.GetLength(0); i += 1)
             {
-                for(int j = 0; j < correlationMat2D.GetLength(1); j++)
+                for (int j = 0; j < correlationMat2D.GetLength(1); j++)
                 {
-                    if(correlationMat2D[i,j] > maxVal)
+                    if (correlationMat2D[i, j] > maxVal)
                     {
                         maxVal = correlationMat2D[i, j];
                     }
@@ -575,14 +662,14 @@ namespace NeoCortexApi.Classifiers
                     {
                         minVal = correlationMat2D[i, j];
                     }
-                    sum+=correlationMat2D[i,j];
+                    sum += correlationMat2D[i, j];
                     count++;
                 }
             }
 
-            res.Add("Max", Math.Round(maxVal,4));
-            res.Add("Min", Math.Round(minVal,4));
-            res.Add("Average", Math.Round(sum / count,4));
+            res.Add("Max", Math.Round(maxVal, 4));
+            res.Add("Min", Math.Round(minVal, 4));
+            res.Add("Average", Math.Round(sum / count, 4));
 
             return res;
         }
@@ -621,7 +708,7 @@ namespace NeoCortexApi.Classifiers
         /// <returns></returns>
         public Dictionary<(TIN, TIN), Dictionary<string, double>> TraceCorrelation(List<TIN> labels)
         {
-            return TraceCorrelation(labels,labels);
+            return TraceCorrelation(labels, labels);
         }
 
         /// <summary>
@@ -682,7 +769,7 @@ namespace NeoCortexApi.Classifiers
         /// <returns></returns>
         public List<string> RenderCorrelationMatrixToCSVFormat(List<TIN> labels)
         {
-            return RenderCorrelationMatrixToCSVFormat(labels,labels);
+            return RenderCorrelationMatrixToCSVFormat(labels, labels);
         }
 
         /// <summary>
@@ -698,8 +785,8 @@ namespace NeoCortexApi.Classifiers
             int offsetIndex = 0; // this is for printting a line after the first header line
             int cellLength = 19;
             string dashLine = "";
-            int lineLength = (cellLength+1) * tableData[0].Split(";").Length + 1;
-            for (int i = 0; i < lineLength;i+=1)
+            int lineLength = (cellLength + 1) * tableData[0].Split(";").Length + 1;
+            for (int i = 0; i < lineLength; i += 1)
             {
                 dashLine += "-";
             }
@@ -710,7 +797,7 @@ namespace NeoCortexApi.Classifiers
                 allEntries.Add(oneLine);
                 Debug.Write("| ");
                 foreach (var cell in oneLine)
-                { 
+                {
                     Debug.Write(string.Format("{0," + -cellLength + "}|", cell));
                 }
                 Debug.Write("\n");
