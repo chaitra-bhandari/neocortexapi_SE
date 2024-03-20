@@ -55,6 +55,7 @@
     <ProjectReference Include="..\NeoCortexEntities\NeoCortexEntities.csproj" />
     <ProjectReference Include="..\NeoCortexUtils\NeoCortexUtils.csproj" />
     <ProjectReference Include="..\WebSocketNeuroVisualizer\WebSocketNeuroVisualizer.csproj" />
+    <ProjectReference Include="..\Project\MySolution\MySolution\MyProject.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="MnistPng28x28\testing\3\1020.png">

@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NeoCortexApi" Version="1.1.4" />
+    <ProjectReference Include="..\..\..\NeoCortexApi\NeoCortexApi.csproj" />
+    <ProjectReference Include="..\..\..\Samples\NeoCortexApiSample\NeoCortexApiSample.csproj" />
+    <ProjectReference Include="..\..\..\NeoCortexEntities\NeoCortexEntities.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NeoCortexEntities.csproj" />
+    <None Include="NeoCortexApi.Experiments.csproj" />
   </ItemGroup>
 </Project>
