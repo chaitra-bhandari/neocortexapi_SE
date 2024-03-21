@@ -39,8 +39,8 @@ namespace NeoCortexApiSample
         {
 
 
-            List<double> inputValues = new List<double>() { 'T', 'h', 'e', 't', 'o', 't', 'e' };
-            List<double> testingData = new List<double>() { 'T', 'h' };
+            List<double> inputValues = new List<double>() { 'T', 'h', 'e', 's', 'n', 'o', 'w' };
+            List<double> testingData = new List<double>() { 'D', 'E' };
 
             //  Path to the input text file.
             string filePath = "C:/Users/lenovo/Desktop/Sample.txt";

@@ -3,7 +3,7 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
-using ScottPlot.Drawing.Colormaps;
+//using ScottPlot.Drawing.Colormaps;
 using System;
 using System.Collections.Generic;
 using System.Data;
