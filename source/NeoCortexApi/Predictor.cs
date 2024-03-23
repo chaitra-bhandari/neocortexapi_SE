@@ -72,9 +72,7 @@ namespace NeoCortexApi
             throw new NotImplementedException();
         }
 
-        public List<Predictor> AddPredictor(Predictor predictor)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }
+//}

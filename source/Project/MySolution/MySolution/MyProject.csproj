@@ -8,6 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NeoCortexApi" Version="1.1.4" />
+    <PackageReference Include="NeoCortexApi" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\NeoCortexApi\NeoCortexApi.csproj" />
+    <ProjectReference Include="..\..\..\NeoCortexArrayLib\NeoCortexArrayLib.csproj" />
+    <ProjectReference Include="..\..\..\NeoCortexEntities\NeoCortexEntities.csproj" />
+    <ProjectReference Include="..\..\..\NeoCortexUtils\NeoCortexUtils.csproj" />
+    <ProjectReference Include="..\..\..\Samples\ApproveMultiSequenceLearning\ApproveMultiSequenceLearning.csproj" />
+    <ProjectReference Include="..\..\..\Samples\NeoCortexApiPersistenceSample\NeoCortexApiPersistenceSample.csproj" />
+    <ProjectReference Include="..\..\..\Samples\NeoCortexApiSample\NeoCortexApiSample.csproj" />
+    <ProjectReference Include="..\..\..\UnitTestsProject\UnitTestsProject.csproj" />
   </ItemGroup>
 </Project>

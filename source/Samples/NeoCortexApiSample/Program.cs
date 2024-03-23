@@ -4,7 +4,7 @@ using NeoCortexApiSample;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+//using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections;
 using System.Numerics;
 using System.Drawing;
@@ -50,7 +50,6 @@ namespace NeoCortexApiSample
 
             //Call the function to read the file and convert to char array.
             List<char> charList = ReadFileAndConvertToCharList(filePath);
-
             //Add asciiValue to a List 
             foreach (char character in charList)
             {
@@ -82,48 +81,31 @@ namespace NeoCortexApiSample
             List<Predictor> asciiVareturnedPredicor = new List<Predictor>();
             // Print the ascii value
 
-            //  List<double> asciiVal = new List<double>() { 'e','f'};
-            MultiSequenceLearning experiment = new MultiSequenceLearning();
 
-            //  Get the flattened list of batches with overlapping starting from the 4th index
-            List<double> batch1 = SplitIntoBatches(inputValues, 8, 4);
 
-            Console.WriteLine($" The size list is {batch1.Count}");
 
-            Console.WriteLine($" The modified list is");
-            foreach (var item in batch1)
+
+
+            int batch_size = 8;
+            int overlap = 4;
+
+            //  Get the flattened list of batches with overlapping starting from the 4th index.
+            List<double> totalBatch = SplitIntoBatches(inputValues, batch_size, overlap);
+
+            for (int i = 0; i < totalBatch.Count; i += batch_size)
             {
-                Console.Write(item + " ");
-            }
+                List<double> batch = totalBatch.GetRange(i, batch_size);
+
+                // Prototype for building the prediction engine.
+                MultiSequenceLearning experiment = new MultiSequenceLearning();
+                var predictor = experiment.Run(batch);
+
+                ////Predictions for the next elements in the input/test sequence.
+                //PredictNextElement(predictor, testingData);
 
 
-
-            for (int i = 0; i < batch1.Count; i += 8)
-            {
-                List<double> batch = batch1.GetRange(i, 8);
-
-
-
-
-
-                var predictor = experiment.Run(inputValues);
-
-
-
-
-
-
-
-                asciiVareturnedPredicor = predictor.AddPredictor(predictor);
-                predictor.Reset();
-
-
-
-                PredictNextElement(predictor, testingData);
-
-
-
-                Console.Write("Ask Question: ");
+                // Read the user's input from the console
+                Console.Write("\n Ask Question: ");
 
                 // Read the user's input from the console
                 string inputText = Console.ReadLine();
@@ -136,99 +118,184 @@ namespace NeoCortexApiSample
                     asciiVal.Add(c);
 
                 }
-
-
-
-                foreach (var v in asciiVareturnedPredicor)
-                {
-                    PredictNextElement(v, asciiVal);
-                }
-
-
-
-
-
+                //Predictions for the next elements in the input/test sequence.
+                PredictNextElement(predictor, asciiVal);
             }
 
         }
 
-
-
-
-        public static void PredictNextElement(Predictor predictor, List<double> myList)
+        /// <summary>
+        /// Reads a set of list from an text file/user input.
+        /// Calculates prediction accuracy for all the predictions.
+        /// Output is determined by selecting the string with the highest accuracy.
+        /// </summary>
+        /// <param name="predictor">obj of class Predictor</param>
+        /// <param name="list">List of sequences</param>
+        private static void PredictNextElement(Predictor predictor, List<double> list)
         {
-
             Debug.WriteLine("------------------------------");
 
+            int totalMatches = 0;
+            int totalPredictions = 0;
+            double maxAccuracy = 0.0;
+            string bestResponse = "";
+            string generatedResponse = "";
+            double highestaccuracy = 0.0;
+            double accuracy = 0.0;
 
-
-
-
-            foreach (var item in myList)
+            for (int i = 0; i < list.Count - 1; i++)
             {
+                var val = list[i];
+                var predictedVal = list[i + 1];
+                var res = predictor.Predict(val);
 
-                var res = predictor.Predict(item);
-                //   if (item == myList.First())
+                if (res.Count > 0)
                 {
-                    if (res.Count > 0)
+                    var tokens = res.First().PredictedInput.Split('_');
+                    var tokens2 = res.First().PredictedInput.Split('-');
+
+                    var tokens3 = tokens2.Last();
+                    var token4 = res.First().PredictedInput.Split('_').Last();
+
+                    Debug.WriteLine($"token4: {token4}, predicted next element {tokens2.Last()}");
+
+                    Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens2.Last()}");
+
+                    //Split a string into an array of substrings
+                    string[] parts = tokens[0].Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    // Create a list to store the double values
+                    List<double> doubleList = new List<double>();
+
+                    // Parse each part into a double and add it to the list
+                    foreach (string part in parts)
                     {
+                        double value = double.Parse(part);
+                        doubleList.Add(value);
+                    }
+                    generatedResponse = DecodeNumericalSequence(doubleList);
 
+                    Console.WriteLine($" \n Generated Response: {generatedResponse}");
 
-                        var tokens = res.First().PredictedInput.Split('_');
+                    Debug.WriteLine("Generated Response: " + generatedResponse);
 
-                        var tokens2 = res.First().PredictedInput.Split('-');
-
-                        Console.WriteLine($"token2 ={tokens2.Last()}");
-
-
-                        Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens2.Last()}");
-                        //  Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens4.Last()}");
-
-                        //Split a string into an array of substrings
-                        string[] parts = tokens[0].Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
-
-                        // Create a list to store the double values
-                        List<double> doubleList = new List<double>();
-
-                        // Parse each part into a double and add it to the list
-                        foreach (string part in parts)
-                        {
-                            double value = double.Parse(part);
-                            doubleList.Add(value);
-                        }
-                        string generatedResponse = DecodeNumericalSequence(doubleList);
-
-                        Console.WriteLine($"\"Generated Response: +{generatedResponse}");
-
-                        Debug.WriteLine("Generated Response: " + generatedResponse);
+                    if (predictedVal == double.Parse(tokens2.Last()))
+                    {
+                        totalMatches++;
+                        Console.WriteLine($" totalMatches:{totalMatches}");
                     }
                     else
-                        Debug.WriteLine("Nothing predicted :( ");
+                    {
+                        Console.WriteLine("Nothing predicted :( ");
+                    }
 
-
-                    Debug.WriteLine("------------------------------");
                 }
-            }
-
-            static string DecodeNumericalSequence(List<double> generatedTokens)
-            {
-                // Decode generated tokens to characters
-
-                string decodedString = "";
-                foreach (int token in generatedTokens)
+                else
                 {
-                    decodedString += (char)token;
+                    Debug.WriteLine("Nothing predicted :( ");
                 }
-                return decodedString;
+
+                totalPredictions++;
+
+                //accuracy = Accuracycalculation(totalMatches, totalPredictions);
+                //Console.WriteLine($" sequence {generatedResponse} with  Accuracy: {accuracy}%");
+                //Debug.WriteLine($" sequence {generatedResponse} with  Accuracy: {accuracy}%");
+
+                (double maxAccuracyCalculated, string bestGeneratedResponse) = Accuracycalculation(totalMatches, totalPredictions, ref maxAccuracy, generatedResponse);
+                highestaccuracy = maxAccuracyCalculated;
+                bestResponse = bestGeneratedResponse;
+
+
+                // Debug.WriteLine($"Predicted sequence : {generatedResponse},sequence with accuracy: {accuracy}%");
             }
+
+            Console.WriteLine($" sequence {bestResponse} with highest Accuracy: {highestaccuracy}%");
+            Debug.WriteLine($" sequence {bestResponse} with highest Accuracy: {highestaccuracy}%");
+        }
+
+        /// <summary>
+        /// Calculates highest accuracy among all the prediction.
+        /// </summary>
+        /// <param name="accuracy">calculated accuracy </param>
+        /// <param name="maxAcuuracy">maximum accuracy </param>
+        /// <param name="generatedResponse">generated response for each cycle </param>
+        ///<returns> an object of bestGeneratedResponse  </returns>
+        //public static (double maxAccuracy, string bestGeneratedResponse) GetHighestAccuracyPrediction(double accuracy, double maxAccuracy, string generatedResponse)
+        //    {
+        //    string bestGeneratedResponse = "";
+        //     if (accuracy > maxAccuracy)
+        //        {
+        //        maxAccuracy = accuracy;
+        //        bestGeneratedResponse = generatedResponse;
+        //        Console.WriteLine($" \n sequence {generatedResponse} with macAccuracy:  {maxAccuracy} %");
+        //        }
+        //    return (maxAccuracy, bestGeneratedResponse);
+        //    }
+
+        ///<summary>
+        ///Method to calculate accuracy.
+        ///</summary>
+        ///<param name="totalMatches">totalMatches among all the predictions</param>
+        ///<param name="totalPredictions">total number of predictions</param>
+        ///<returns> accuracy as double val </returns>
+        public static (double maxAccuracy, string bestGeneratedResponse) Accuracycalculation(int totalMatches, int totalPredictions, ref double maxAccuracy, string generatedResponse)
+        {
+            double accuracy = (double)totalMatches / totalPredictions * 100;
+            Console.WriteLine($" sequence {generatedResponse} with  Accuracy: {accuracy}%");
+            // return accuracy;
+            string bestGeneratedResponse = "";
+            if (accuracy > maxAccuracy)
+            {
+                maxAccuracy = accuracy;
+                bestGeneratedResponse = generatedResponse;
+
+            }
+            Console.WriteLine($" sequence with maxAccuracy:  {maxAccuracy} %");
+            return (maxAccuracy, bestGeneratedResponse);
+
 
         }
 
+        ///<summary>
+        ///Method to decode list values into characters.
+        ///</summary>
+        ///<param name="generatedTokens">generated prediction for each iteration</param>
+        ///<returns>Object of string</returns>
+        static string DecodeNumericalSequence(List<double> generatedTokens)
+        {
+            // Decode generated tokens to characters
 
+            string decodedString = "";
+            foreach (int token in generatedTokens)
+            {
+                decodedString += (char)token;
+            }
+            return decodedString;
+        }
 
+        ///<summary>
+        ///Method to convert characters to ASCII values.
+        ///</summary>
+        ///<param name="charList">character list </param>
+        ///<returns>Object of ascii values list</returns>
+        public static List<double> ConvertToAscii(List<char> charList)
+        {
+            List<double> asciiValues = new List<double>();
 
+            foreach (char character in charList)
+            {
+                double asciiValue = (double)character;
+                asciiValues.Add(asciiValue);
+            }
 
-        //Function to read the file and return  char array.
+            return asciiValues;
+        }
+
+        ///<summary>
+        ///Method to read the file and return char array.
+        ///</summary>
+        ///<param name="filePath">file path of text file</param>
+        ///<returns>Object of character list</returns>
         public static List<char> ReadFileAndConvertToCharList(string filePath)
 
         {
@@ -240,7 +307,7 @@ namespace NeoCortexApiSample
                 string fileContent = File.ReadAllText(filePath);
 
                 //Remove \r, \n, \t, and regular spaces
-                string cleanedContent = fileContent.Replace("\r", "").Replace("\n", "").Replace("\t", "").Replace(" ", "");
+                string cleanedContent = fileContent.Replace("\r", "").Replace("\n", "").Replace("\t", "");
 
                 //Join all characters into a single string
                 string joinedString = string.Join("", cleanedContent.ToCharArray());
@@ -251,10 +318,10 @@ namespace NeoCortexApiSample
                 Console.WriteLine("The spaces is removed successfully.");
 
                 //Read the modified file
-                string fileContent1 = File.ReadAllText(@"outputFilePath");
+                string modified_fileContent = File.ReadAllText(@"outputFilePath");
 
                 //Convert the string to a char array
-                char[] charArray = fileContent1.ToCharArray();
+                char[] charArray = modified_fileContent.ToCharArray();
 
                 //Convert the char array to a list
                 charList.AddRange(charArray);
@@ -268,26 +335,28 @@ namespace NeoCortexApiSample
             return charList;
         }
 
-        public static List<double> SplitIntoBatches(List<double> numbers, int batchSize, int overlap)
+        ///<summary>
+        ///Method to get an overlapping sequence, where each 8-character segment overlaps by 4 characters with the adjacent segments.
+        ///</summary>
+        ///<param name="inputValues">list of input values</param>
+        ///<param name="batchSize">batchSize = 8 </param>
+        ///<param name="overlap">overlap= 4 </param>
+        ///<returns>Object of list of overlappingSequence</returns>
+        public static List<double> SplitIntoBatches(List<double> inputValues, int batchSize, int overlap)
         {
 
             List<double> overlappingSequence = new List<double>();
 
-            for (int i = 0; i < numbers.Count - 8; i += 4) // Increment by 4
+            for (int i = 0; i < inputValues.Count - batchSize; i += overlap)
             {
-                List<double> sequence = numbers.GetRange(i, 8);
+                List<double> sequence = inputValues.GetRange(i, batchSize);
                 overlappingSequence.AddRange(sequence);
             }
-
-
-
             return overlappingSequence;
 
         }
 
-        public static object PredictNextElement(List<double> inputList)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }
+
