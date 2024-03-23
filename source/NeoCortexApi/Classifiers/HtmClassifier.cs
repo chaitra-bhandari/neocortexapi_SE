@@ -570,7 +570,7 @@ namespace NeoCortexApi.Classifiers
             return arr;
             }
 
-        private int PredictNextValue(int[] activeArr, int[] predictedArr)
+        public int PredictNextValue(int[] activeArr, int[] predictedArr)
             {
             var same = predictedArr.Intersect(activeArr);
 

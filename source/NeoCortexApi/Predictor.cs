@@ -3,6 +3,7 @@ using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -56,9 +57,42 @@ namespace NeoCortexApi
         public List<ClassifierResult<string>> Predict(double input)
         {
             var lyrOut = this.layer.Compute(input, false) as ComputeCycle;
+            //List<Cell> actCells;
 
-            List<ClassifierResult<string>> predictedInputValues = this.classifier.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
+            //if (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count)
+            //    {
+            //    actCells = lyrOut.ActiveCells;
+            //    }
+            //else
+            //    {
+            //    actCells = lyrOut.WinnerCells;
+            //    }
 
+            //Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
+            //Debug.WriteLine($"Cell SDR: {Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray())}");
+            //String SdrValues = Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray());
+            //int[] indices = SdrValues.Split(',')
+            //             .Select(int.Parse)
+            //             .ToArray();
+            //Debug.WriteLine($"SDR values :{SdrValues} ");
+            //////string[] substrings = SdrValues.Split(',')
+            ////                                          .Select(s => s.Trim())
+            //                                          .ToArray();
+
+            //// Convert each substring to an integer and add it to a list
+            //List<int> intList = new List<int>();
+            //foreach (var substring in substrings)
+            //    {
+            //    if (int.TryParse(substring, out int intValue))
+            //        {
+            //        intList.Add(intValue);
+            //        }
+            //    }
+             List<ClassifierResult<string>> predictedInputValues = this.classifier.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
+            //int[] intArray = predictedInputValues.Select(result => int.Parse(result.PredictedInput))
+            //                         .ToArray();
+            //int count = this.classifier.PredictNextValue(indices, intArray);
+            //Debug.WriteLine($"count values :{count} ");
             return predictedInputValues;
         }
 
