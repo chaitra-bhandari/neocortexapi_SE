@@ -21,6 +21,8 @@ namespace NeoCortexApiSample
     public class Program
 
     {
+        private static List<double> inputValues1;
+
         static void Main(string[] args)
         {
             RunMultiSequenceLearningExperiment();
@@ -39,13 +41,13 @@ namespace NeoCortexApiSample
         {
 
 
-            List<double> inputValues = new List<double>() { 'T', 'h', 'e', 's', 'n', 'o', 'w' };
-            List<double> testingData = new List<double>() { 'D', 'E' };
+            List<double> inputValues = new List<double>();
+            List<double> testingData = new List<double>();
 
             //  Path to the input text file.
-            string filePath = "C:/Users/lenovo/Desktop/Sample.txt";
+            string filePath = "C:/Users/lenovo/Desktop/neocortexapi_SE/source/Project_SE/MySolution/MySolution/bin/Debug/net8.0filename.txt";
 
-            string filePath1 = "C:/Users/lenovo/Desktop/Training1.txt";
+            string filePath1 = "C:/Users/lenovo/Desktop/testData.txt";
             List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
 
             //Call the function to read the file and convert to char array.
@@ -106,7 +108,7 @@ namespace NeoCortexApiSample
 
 
 
-                var predictor = experiment.Run(inputValues);
+                var predictor = experiment.Run(inputValues1);
 
 
 
@@ -114,7 +116,7 @@ namespace NeoCortexApiSample
 
 
 
-                //asciiVareturnedPredicor = predictor.AddPredictor(predictor);
+                asciiVareturnedPredicor = predictor.AddPredictor(predictor);
                 predictor.Reset();
 
 
@@ -139,90 +141,152 @@ namespace NeoCortexApiSample
 
 
 
-                foreach (var v in asciiVareturnedPredicor)
-                {
-                    PredictNextElement(v, asciiVal);
-                }
-
-
-
-
-
             }
 
         }
 
 
-
-
-        public static void PredictNextElement(Predictor predictor, List<double> myList)
+        private static void PredictNextElement(Predictor predictor, List<double> list)
         {
 
             Debug.WriteLine("------------------------------");
+            int countOfMatches = 0;
+            int totalPredictions = 0;
+            string predictedSequence = "";
+            string predictedNextElement = "";
+            string predictedNextElementsList = "";
 
-
-
-
-
-            foreach (var item in myList)
+            for (int i = 0; i < list.Count - 1; i++)
             {
-
+                var item = list[i];
+                var nextItem = list[i + 1];
                 var res = predictor.Predict(item);
-                //   if (item == myList.First())
+
+                if (res.Count > 0)
                 {
-                    if (res.Count > 0)
+                    var tokens = res.First().PredictedInput.Split('_');
+                    var tokens2 = res.First().PredictedInput.Split('-');
+                    var tokens3 = res.Last().PredictedInput.Split('_');
+                    predictedSequence = tokens[0];
+                    predictedNextElement = tokens2.Last();
+                    predictedNextElementsList = string.Join("-", tokens3.Skip(1));
+                    Debug.WriteLine($"Predicted Sequence: {predictedSequence}, predicted next element {predictedNextElement}");
+
+                    if (nextItem == double.Parse(predictedNextElement))
                     {
-
-
-                        var tokens = res.First().PredictedInput.Split('_');
-
-                        var tokens2 = res.First().PredictedInput.Split('-');
-
-                        Console.WriteLine($"token2 ={tokens2.Last()}");
-
-
-                        Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens2.Last()}");
-                        //  Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens4.Last()}");
-
-                        //Split a string into an array of substrings
-                        string[] parts = tokens[0].Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
-
-                        // Create a list to store the double values
-                        List<double> doubleList = new List<double>();
-
-                        // Parse each part into a double and add it to the list
-                        foreach (string part in parts)
-                        {
-                            double value = double.Parse(part);
-                            doubleList.Add(value);
-                        }
-                        string generatedResponse = DecodeNumericalSequence(doubleList);
-
-                        Console.WriteLine($"\"Generated Response: +{generatedResponse}");
-
-                        Debug.WriteLine("Generated Response: " + generatedResponse);
+                        countOfMatches++;
                     }
-                    else
-                        Debug.WriteLine("Nothing predicted :( ");
-
-
-                    Debug.WriteLine("------------------------------");
                 }
-            }
-
-            static string DecodeNumericalSequence(List<double> generatedTokens)
-            {
-                // Decode generated tokens to characters
-
-                string decodedString = "";
-                foreach (int token in generatedTokens)
+                else
                 {
-                    decodedString += (char)token;
+                    Debug.WriteLine("Nothing predicted :(");
                 }
-                return decodedString;
+
+                totalPredictions++;
+
+                // Accuracy logic added which is based on count of matches and total predictions.
+                double accuracy = AccuracyCalculation(list, countOfMatches, totalPredictions, predictedSequence, predictedNextElement, predictedNextElementsList);
+                Debug.WriteLine($"Final Accuracy for elements found in predictedNextElementsList = {accuracy}%");
+
             }
 
+            Debug.WriteLine("------------------------------");
         }
+
+        // Accuracy logic added which is based on count of matches and total predictions.
+        // Accuracy is calculated in the context of predicting the next element in a sequence.
+        // The accuracy is calculated as the percentage of correctly predicted next elements (countOfMatches)
+        // out of the total number of predictions (totalPredictions).
+        private static double AccuracyCalculation(List<double> list, int countOfMatches, int totalPredictions, string predictedSequence, string predictedNextElement, string predictedNextElementsList)
+        {
+            double accuracy = (double)countOfMatches / totalPredictions * 100;
+            Debug.WriteLine(string.Format("The test data list: ({0}).", string.Join(", ", list)));
+
+            // Append to file in each iteration
+            if (predictedNextElementsList != "")
+            {
+                string line = $"Predicted Sequence Number is: {predictedSequence}, Predicted Sequence: {predictedNextElementsList}, Predicted Next Element: {predictedNextElement}, with Accuracy =: {accuracy}%";
+
+                Debug.WriteLine(line);
+
+            }
+            else
+            {
+                string line = $"Nothing is predicted, Accuracy is: {accuracy}%";
+                Debug.WriteLine(line);
+            }
+            return accuracy;
+        }
+
+
+        //public static void PredictNextElement(Predictor predictor, List<double> myList)
+        //    {
+
+        //    Debug.WriteLine("------------------------------");
+
+
+
+
+
+        //    foreach (var item in myList)
+        //        {
+
+        //        var res = predictor.Predict(item);
+        //       //   if (item == myList.First())
+        //            {
+        //            if (res.Count > 0)
+        //                {
+
+
+        //                var tokens = res.First().PredictedInput.Split('_');
+
+        //                var tokens2 = res.First().PredictedInput.Split('-');
+
+        //                Console.WriteLine($"token2 ={tokens2.Last()}");
+
+
+        //                Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens2.Last()}");
+        //                //  Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens4.Last()}");
+
+        //                //Split a string into an array of substrings
+        //                string[] parts = tokens[0].Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+
+        //                // Create a list to store the double values
+        //                List<double> doubleList = new List<double>();
+
+        //                // Parse each part into a double and add it to the list
+        //                foreach (string part in parts)
+        //                    {
+        //                    double value = double.Parse(part);
+        //                    doubleList.Add(value);
+        //                    }
+        //                string generatedResponse = DecodeNumericalSequence(doubleList);
+
+        //                Console.WriteLine($"\"Generated Response: +{ generatedResponse }");
+
+        //                Debug.WriteLine("Generated Response: " + generatedResponse); 
+        //                }
+        //            else
+        //                Debug.WriteLine("Nothing predicted :( ");
+
+
+        //            Debug.WriteLine("------------------------------");
+        //            }
+        //        }
+
+        //    static string DecodeNumericalSequence(List<double> generatedTokens)
+        //        {
+        //        // Decode generated tokens to characters
+
+        //        string decodedString = "";
+        //        foreach (int token in generatedTokens)
+        //            {
+        //            decodedString += (char)token;
+        //            }
+        //        return decodedString;
+        //        }
+
+        //    }
 
 
 
@@ -291,3 +355,49 @@ namespace NeoCortexApiSample
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

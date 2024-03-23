@@ -1,4 +1,5 @@
-﻿using NeoCortexApi;
+﻿
+using NeoCortexApi;
 using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
