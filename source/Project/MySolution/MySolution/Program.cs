@@ -1,6 +1,7 @@
 ﻿using NeoCortexApi;
 using NeoCortexApi.Encoders;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace NeoCortexApiSample
         /// </summary>
         private static void RunMultiSequenceLearningExperiment()
         {
-            List<double> asciiSequence = new List<double>();
+            List<double> inputValues = new List<double>();
 
             Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
 
@@ -41,39 +42,43 @@ namespace NeoCortexApiSample
             {
                 double asciiValue = (double)character;
 
-                asciiSequence.Add(asciiValue);
+                inputValues.Add(asciiValue);
 
             }
             Console.WriteLine("ASCII Sequence:");
 
-            foreach (int asciiCode in asciiSequence)
-            {
-                Console.Write(asciiCode + " ");
-            }
-            sequences.Add("S1", asciiSequence);
+           
 
             // Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
 
-            var predictor = experiment.Run(sequences);
+            var predictor = experiment.Run(inputValues);
 
 
             // These list are used to see how the prediction works.
             // Predictor is traversing the list element by element. 
             // By providing more elements to the prediction, the predictor delivers more precise result.
-            var list1 = new double[] { 'F', 'i', 'r', 's', 't' };
-            var list2 = new double[] { 'F', 'I', 'R', 'S', 'T' };
-            var list3 = new double[] { 'c', 'i' };
+            List<double> list1 = new List<double>();
 
+            // Relative file path to testing file
+            string filePath1 = @"testingdata.txt";
+
+            List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
+            foreach (char character in charList1)
+            {
+                double ascii = (double)character;
+                list1.Add(ascii);
+
+            }
+
+            //Converting the list of doubles into a var variable
+            double[] doubleArray = list1.ToArray();
+            Console.WriteLine(doubleArray);
 
             predictor.Reset();
-            PredictNextElement(predictor, list1);
+            PredictNextElement(predictor, doubleArray);
 
-            predictor.Reset();
-            PredictNextElement(predictor, list2);
-
-            predictor.Reset();
-            PredictNextElement(predictor, list3);
+          
         }
 
         private static void PredictNextElement(Predictor predictor, double[] list)
@@ -115,7 +120,7 @@ namespace NeoCortexApiSample
 
             try
             {
-                // Read all text from the file
+                // 9Read all text from the file
                 string fileContent = File.ReadAllText(filePath);
 
                 //Remove \r, \n, \t, and regular spaces
@@ -123,20 +128,37 @@ namespace NeoCortexApiSample
 
                 //Join all characters into a single string
                 string joinedString = string.Join("", cleanedContent.ToCharArray());
+                if (filePath == @"filename.txt")
 
                 //Write the joined string to the output file
-                File.WriteAllText(@"outputFilePath", joinedString, Encoding.UTF8);
+                {
+                    File.WriteAllText(@"outputFilePath", joinedString, Encoding.UTF8);
+
+                    Console.WriteLine("The spaces is removed successfully.");
+
+                    //Read the modified file
+                    string fileContent1 = File.ReadAllText(@"outputFilePath");
+
+                    //Convert the string to a char array
+                    char[] charArray = fileContent1.ToCharArray();
+
+                    //Convert the char array to a list
+                    charList.AddRange(charArray);
+                }
+                else
+                    File.WriteAllText(@"outputFile", joinedString, Encoding.UTF8);
 
                 Console.WriteLine("The spaces is removed successfully.");
 
                 //Read the modified file
-                string fileContent1 = File.ReadAllText(@"outputFilePath");
+                string fileContent2 = File.ReadAllText(@"outputFilePath");
 
                 //Convert the string to a char array
-                char[] charArray = fileContent1.ToCharArray();
+                char[] charArray1 = fileContent2.ToCharArray();
 
                 //Convert the char array to a list
-                charList.AddRange(charArray);
+                charList.AddRange(charArray1);
+
             }
             catch (Exception ex)
             {
@@ -149,6 +171,15 @@ namespace NeoCortexApiSample
     }
 
 }
+
+
+
+
+
+
+
+
+
 
 
 
