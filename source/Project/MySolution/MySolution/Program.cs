@@ -1,9 +1,11 @@
-﻿using System;
+﻿
+using System;
 using NeoCortexApi;
 using NeoCortexApiSample;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections;
 using System.Numerics;
 using System.Drawing;
@@ -14,81 +16,115 @@ using System.Runtime.Intrinsics.X86;
 using NeoCortexApi.Classifiers;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
-using IronXL;
-using Microsoft.Azure.Documents;
-
+//using static NeoCortexApi.Utility.GroupBy2<R>;
 namespace NeoCortexApiSample
 {
     public class Program
+
     {
-        /// <summary>
-        /// This sample shows a typical experiment code for SP and TM.
-        /// You must start this code in debugger to follow the trace.
-        /// and TM.
-        /// </summary>
-        /// <param name="args"></param>
         static void Main(string[] args)
         {
-            RunLanguageSemanticExperiment();
+            RunMultiSequenceLearningExperiment();
         }
-
         /// <summary>
-        /// This code demonstrates how to learn sequences and how to use the prediction mechanism.
+        /// This example demonstrates how to learn sequences and how to use the prediction mechanism.
         /// First,string is converted into an array of characters, and asciii value of each character is stored in a list.
         /// Second,sequences are learned from the text file.
-        /// Third,testing data/user input is used used for prediction. The predictor used by experiment privides to the HTM every element of every predicting sequence.
+        /// Third,testing data is used used for prediction. The predictor used by experiment privides to the HTM every element of every predicting sequence.
         /// The predictor tries to predict the next element.
-        /// Accuracy is calculated depends on total matches among all the prediction.
         /// </summary>
         ///
 
 
-        /// <summary>
-        /// Runs a multi-sequence prediction experiment using a prototype for building the prediction engine.
-        /// </summary>
-        private static void RunLanguageSemanticExperiment()
+        private static void RunMultiSequenceLearningExperiment()
         {
-            List<double> inputValues = new List<double>();
+
+
+            List<double> inputValues = new List<double>() { 'T', 'h', 'e', 't', 'o', 't', 'e' };
             List<double> testingData = new List<double>();
 
-            //  Path to the learning text file.
-            string filePathToTrainingData = "C:/Users/DELL/Desktop/sample.txt";
+            //  Path to the input text file.
+            string filePath = "C:/Users/DELL/Desktop/sample.txt";
 
-            //Call the method to read the file and convert to char array.
-            List<char> charListOfTrainData = ReadFileAndConvertToCharList(filePathToTrainingData);
+            string filePath1 = "C:/Users/DELL/Desktop/training.txt";
+            List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
 
-            //Path to the training text file.
-            string filePathToTestData = "C:/Users/DELL/Desktop/training.txt";
+            //Call the function to read the file and convert to char array.
+            List<char> charList = ReadFileAndConvertToCharList(filePath);
 
-            //Call the method to read the file and convert to char array.
-            List<char> charListTestData = ReadFileAndConvertToCharList(filePathToTestData);
-
-            //Call the method to convert character to ASCII.
-            inputValues = ConvertToAscii(charListOfTrainData);
-            testingData = ConvertToAscii(charListTestData);
-
-
-
-            int batch_size = 8;
-            int overlap = 4;
-
-            //  Get the flattened list of batches with overlapping starting from the 4th index.
-            List<double> totalBatch = SplitIntoBatches(inputValues, batch_size, overlap);
-
-            for (int i = 0; i < totalBatch.Count; i += batch_size)
+            //Add asciiValue to a List 
+            foreach (char character in charList)
             {
-                List<double> batch = totalBatch.GetRange(i, batch_size);
+                double asciiValue = (double)character;
 
-                // Prototype for building the prediction engine.
+                inputValues.Add(asciiValue);
+
+            }
+
+
+            foreach (char character in charList1)
+            {
+                double asciiValue1 = (double)character;
+
+                testingData.Add(asciiValue1);
+
+            }
+
+
+
+            Console.WriteLine("ASCII Sequence:");
+
+            foreach (var item in inputValues)
+            {
+                Console.Write(item + " ");
+            }
+
+
+            List<Predictor> asciiVareturnedPredicor = new List<Predictor>();
+            // Print the ascii value
+
+            //  List<double> asciiVal = new List<double>() { 'e','f'};
+            
+
+            //  Get the flattened list of batches with overlapping starting from the 4th index
+            List<double> batch1 = SplitIntoBatches(inputValues, 8, 4);
+
+            Console.WriteLine($" The size list is {batch1.Count}");
+
+            Console.WriteLine($" The modified list is");
+            foreach (var item in batch1)
+            {
+                Console.Write(item + " ");
+            }
+
+
+
+            for (int i = 0; i < batch1.Count; i += 8)
+            {
+                List<double> batch = batch1.GetRange(i, 8);
+
+
+
+
                 MultiSequenceLearning experiment = new MultiSequenceLearning();
-                var predictor = experiment.Run(batch);
-
-                ////Predictions for the next elements in the input/test sequence.
-                //PredictNextElement(predictor, testingData);
+                var predictor = experiment.Run(inputValues);
 
 
-                // Read the user's input from the console
-                Console.Write("\n Ask Question: ");
+
+
+
+
+
+                //asciiVareturnedPredicor = predictor.AddPredictor(predictor);
+                //predictor.Reset();
+
+
+
+                PredictNextElement(predictor, testingData);
+
+
+
+                Console.Write("Ask Question: ");
 
                 // Read the user's input from the console
                 string inputText = Console.ReadLine();
@@ -101,19 +137,23 @@ namespace NeoCortexApiSample
                     asciiVal.Add(c);
 
                 }
-                //Predictions for the next elements in the input/test sequence.
+
+
+
                 PredictNextElement(predictor, asciiVal);
+                }
+
+
+
+
+
             }
 
-        }
 
-        /// <summary>
-        /// Reads a set of list from an text file/user input.
-        /// Calculates prediction accuracy for all the predictions.
-        /// Output is determined by selecting the string with the highest accuracy.
-        /// </summary>
-        /// <param name="predictor">obj of class Predictor</param>
-        /// <param name="list">List of sequences</param>
+
+
+
+
         private static void PredictNextElement(Predictor predictor, List<double> list)
         {
             Debug.WriteLine("------------------------------");
@@ -342,26 +382,6 @@ namespace NeoCortexApiSample
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
