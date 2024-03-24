@@ -17,7 +17,7 @@ namespace NeoCortexApiSample
     /// <summary>
     /// Implements an experiment that demonstrates how to learn sequences.
     /// </summary>
-    public class MultiSequenceLearning
+    public class MultisequenceLearning
     {
         /// <summary>
         /// Runs the learning of sequences.
@@ -25,7 +25,7 @@ namespace NeoCortexApiSample
         /// <param name="inputValues">List of sequences</param>
         public Predictor Run(List<double> inputValues)
         {
-            Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
+            Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultisequenceLearning)}");
 
             int inputBits = 100;
             int numColumns = 1024;

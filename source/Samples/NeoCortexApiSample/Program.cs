@@ -4,7 +4,6 @@ using NeoCortexApiSample;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
-//using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections;
 using System.Numerics;
 using System.Drawing;
@@ -15,75 +14,56 @@ using System.Runtime.Intrinsics.X86;
 using NeoCortexApi.Classifiers;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
-using Org.BouncyCastle.Ocsp;
-//using static NeoCortexApi.Utility.GroupBy2<R>;
+
 namespace NeoCortexApiSample
 {
     public class Program
-
     {
+        /// <summary>
+        /// This sample shows a typical experiment code for SP and TM.
+        /// You must start this code in debugger to follow the trace.
+        /// and TM.
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
-            RunMultiSequenceLearningExperiment();
+            RunLanguageSemanticExperiment();
         }
+
         /// <summary>
-        /// This example demonstrates how to learn sequences and how to use the prediction mechanism.
+        /// This code demonstrates how to learn sequences and how to use the prediction mechanism.
         /// First,string is converted into an array of characters, and asciii value of each character is stored in a list.
         /// Second,sequences are learned from the text file.
-        /// Third,testing data is used used for prediction. The predictor used by experiment privides to the HTM every element of every predicting sequence.
+        /// Third,testing data/user input is used used for prediction. The predictor used by experiment privides to the HTM every element of every predicting sequence.
         /// The predictor tries to predict the next element.
+        /// Accuracy is calculated depends on total matches among all the prediction.
         /// </summary>
         ///
 
 
-        private static void RunMultiSequenceLearningExperiment()
+        /// <summary>
+        /// Runs a multi-sequence prediction experiment using a prototype for building the prediction engine.
+        /// </summary>
+        private static void RunLanguageSemanticExperiment()
         {
-
-
             List<double> inputValues = new List<double>();
             List<double> testingData = new List<double>();
 
-            //  Path to the input text file.
-            string filePath = @"C:/Users/lenovo/Desktop/neocortexapi_SE/source/Samples/NeoCortexApiSample/bin/Debug/net8.0/trainData.txt";
+            //  Path to the learning text file.
+            string filePathToTrainingData = "C:/Users/lenovo/Desktop/trainData.txt";
 
-            string filePath1 = @"C:/Users/lenovo/Desktop/neocortexapi_SE/source/Samples/NeoCortexApiSample/bin/Debug/net8.0/testData.txt";
-            List<char> charList1 = ReadFileAndConvertToCharList(filePath1);
+            //Call the method to read the file and convert to char array.
+            List<char> charListOfTrainData = ReadFileAndConvertToCharList(filePathToTrainingData);
 
-            //Call the function to read the file and convert to char array.
-            List<char> charList = ReadFileAndConvertToCharList(filePath);
-            //Add asciiValue to a List 
-            foreach (char character in charList)
-            {
-                double asciiValue = (double)character;
+            //Path to the training text file.
+            string filePathToTestData = "C:/Users/lenovo/Desktop/testData.txt";
 
-                inputValues.Add(asciiValue);
+            //Call the method to read the file and convert to char array.
+            List<char> charListTestData = ReadFileAndConvertToCharList(filePathToTestData);
 
-            }
-
-
-            foreach (char character in charList1)
-            {
-                double asciiValue1 = (double)character;
-
-                testingData.Add(asciiValue1);
-
-            }
-
-
-
-            Console.WriteLine("ASCII Sequence:");
-
-            foreach (var item in inputValues)
-            {
-                Console.Write(item + " ");
-            }
-
-
-            List<Predictor> asciiVareturnedPredicor = new List<Predictor>();
-            // Print the ascii value
-
-
-
+            //Call the method to convert character to ASCII.
+            inputValues = ConvertToAscii(charListOfTrainData);
+            testingData = ConvertToAscii(charListTestData);
 
 
 
@@ -98,15 +78,15 @@ namespace NeoCortexApiSample
                 List<double> batch = totalBatch.GetRange(i, batch_size);
 
                 // Prototype for building the prediction engine.
-                MultiSequenceLearning experiment = new MultiSequenceLearning();
+                MultisequenceLearning experiment = new MultisequenceLearning();
                 var predictor = experiment.Run(batch);
 
                 ////Predictions for the next elements in the input/test sequence.
                 //PredictNextElement(predictor, testingData);
 
-
+                Console.Write("------------------------------------------------------------------------------------------");
                 // Read the user's input from the console
-                Console.Write("\n Ask Question: ");
+                Console.Write(" \n Ask Question: ");
 
                 // Read the user's input from the console
                 string inputText = Console.ReadLine();
@@ -132,17 +112,17 @@ namespace NeoCortexApiSample
         /// </summary>
         /// <param name="predictor">obj of class Predictor</param>
         /// <param name="list">List of sequences</param>
-        private static void PredictNextElement(Predictor predictor, List<double> list)
+        public static void PredictNextElement(Predictor predictor, List<double> list)
         {
             Debug.WriteLine("------------------------------");
 
+            string generatedResponse = "";
             int totalMatches = 0;
             int totalPredictions = 0;
             double maxAccuracy = 0.0;
-            string bestResponse = "";
-            string generatedResponse = "";
-            double highestaccuracy = 0.0;
-            double accuracy = 0.0;
+            string bestCase = "";
+            double maxAccuracyCalculated = 0.0;
+            string bestGeneratedResponse = "";
 
             for (int i = 0; i < list.Count - 1; i++)
             {
@@ -176,84 +156,86 @@ namespace NeoCortexApiSample
                     }
                     generatedResponse = DecodeNumericalSequence(doubleList);
 
-                    Console.WriteLine($" \n Generated Response: {generatedResponse}");
+                    Console.WriteLine($"\n Generated Response is : \"{generatedResponse}\" ");
 
-                    Debug.WriteLine("Generated Response: " + generatedResponse);
+                    Debug.WriteLine($"\n Generated Response is : \"{generatedResponse}\". ");
 
                     if (predictedVal == double.Parse(tokens2.Last()))
                     {
+
                         totalMatches++;
-                        Console.WriteLine($" totalMatches:{totalMatches}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Nothing predicted :( ");
+
                     }
 
                 }
+
                 else
                 {
                     Debug.WriteLine("Nothing predicted :( ");
+
+                    generatedResponse = "Nothing to print";
                 }
 
                 totalPredictions++;
 
-                //accuracy = Accuracycalculation(totalMatches, totalPredictions);
-                //Console.WriteLine($" sequence {generatedResponse} with  Accuracy: {accuracy}%");
-                //Debug.WriteLine($" sequence {generatedResponse} with  Accuracy: {accuracy}%");
+                (maxAccuracyCalculated, bestGeneratedResponse) = Accuracycalculation(totalMatches, totalPredictions, maxAccuracy, generatedResponse, bestCase);
+                maxAccuracy = maxAccuracyCalculated;
 
-                (double maxAccuracyCalculated, string bestGeneratedResponse) = Accuracycalculation(totalMatches, totalPredictions, ref maxAccuracy, generatedResponse);
-                highestaccuracy = maxAccuracyCalculated;
-                bestResponse = bestGeneratedResponse;
+                bestCase = bestGeneratedResponse;
 
-
-                // Debug.WriteLine($"Predicted sequence : {generatedResponse},sequence with accuracy: {accuracy}%");
             }
-
-            Console.WriteLine($" sequence {bestResponse} with highest Accuracy: {highestaccuracy}%");
-            Debug.WriteLine($" sequence {bestResponse} with highest Accuracy: {highestaccuracy}%");
+            if (maxAccuracy == 0)
+            {
+                Console.WriteLine($" \n Nothing was predicted correctely.  Accuracy is {maxAccuracy.ToString("0.00")}%");
+            }
+            else
+            {
+                Console.WriteLine($" \n The predicted sequence is  \"{bestCase}\" with highest Accuracy: {maxAccuracy.ToString("0.00")}%");
+                Debug.WriteLine($" \n The predicted sequence is  \"{bestCase}\"  with highest Accuracy: {maxAccuracy.ToString("0.00")}%");
+            }
+            Console.Write("------------------------------------------------------------------------------------------");
         }
 
-        /// <summary>
-        /// Calculates highest accuracy among all the prediction.
-        /// </summary>
-        /// <param name="accuracy">calculated accuracy </param>
-        /// <param name="maxAcuuracy">maximum accuracy </param>
-        /// <param name="generatedResponse">generated response for each cycle </param>
-        ///<returns> an object of bestGeneratedResponse  </returns>
-        //public static (double maxAccuracy, string bestGeneratedResponse) GetHighestAccuracyPrediction(double accuracy, double maxAccuracy, string generatedResponse)
-        //    {
-        //    string bestGeneratedResponse = "";
-        //     if (accuracy > maxAccuracy)
-        //        {
-        //        maxAccuracy = accuracy;
-        //        bestGeneratedResponse = generatedResponse;
-        //        Console.WriteLine($" \n sequence {generatedResponse} with macAccuracy:  {maxAccuracy} %");
-        //        }
-        //    return (maxAccuracy, bestGeneratedResponse);
-        //    }
-
         ///<summary>
-        ///Method to calculate accuracy.
+        ///Method to calculate output with highest Accuracy
+        ///Accuracy is calculated by using text of predicting the next element in a sequence.
+        ///Total Accuracy = total matches/total number of predictions
+        ///predicted output upon highest accuracy
         ///</summary>
         ///<param name="totalMatches">totalMatches among all the predictions</param>
         ///<param name="totalPredictions">total number of predictions</param>
-        ///<returns> accuracy as double val </returns>
-        public static (double maxAccuracy, string bestGeneratedResponse) Accuracycalculation(int totalMatches, int totalPredictions, ref double maxAccuracy, string generatedResponse)
+        ///<param name="maxAcuuracy">maximum accuracy </param>
+        ///<param name="generatedResponse">generated response for each cycle </param>
+        ///<returns> maximum accuracy and highest accurate respone </returns>
+        public static (double maxAccuracy, string bestGeneratedResponse) Accuracycalculation(int totalMatches, int totalPredictions, double maxAccuracy, string generatedResponse, string bestCase)
         {
             double accuracy = (double)totalMatches / totalPredictions * 100;
-            Console.WriteLine($" sequence {generatedResponse} with  Accuracy: {accuracy}%");
-            // return accuracy;
+            if (accuracy == 0)
+            {
+                Console.WriteLine($" The predicted response is: \"{generatedResponse}\". Nothing was predicted correctly. The accuracy is: {accuracy.ToString("0.00")}%");
+            }
+            else
+            {
+                Console.WriteLine($" The predicted respone is:  \"{generatedResponse}\" with  Accuracy: {accuracy.ToString("0.00")}%");
+            }
+
             string bestGeneratedResponse = "";
+
             if (accuracy > maxAccuracy)
             {
-                maxAccuracy = accuracy;
+
                 bestGeneratedResponse = generatedResponse;
+                maxAccuracy = accuracy;
 
             }
-            Console.WriteLine($" sequence with maxAccuracy:  {maxAccuracy} %");
-            return (maxAccuracy, bestGeneratedResponse);
 
+
+            else
+            {
+                bestGeneratedResponse = bestCase;
+            }
+
+            return (maxAccuracy, bestGeneratedResponse);
 
         }
 
@@ -264,8 +246,6 @@ namespace NeoCortexApiSample
         ///<returns>Object of string</returns>
         static string DecodeNumericalSequence(List<double> generatedTokens)
         {
-            // Decode generated tokens to characters
-
             string decodedString = "";
             foreach (int token in generatedTokens)
             {
