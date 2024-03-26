@@ -32,6 +32,9 @@ namespace NeoCortexApi.Classifiers
         /// </summary>
         public double Similarity { get; set; }
 
+        /// <summary>
+        /// To get all the predictive values
+        /// </summary>
         public string BestMatchString { get; set; }
         }
 

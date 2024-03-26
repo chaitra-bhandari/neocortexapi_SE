@@ -50,11 +50,18 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NeoCortexApi.Parallel\NeoCortexApi.Parallel.csproj" />
-    <ProjectReference Include="..\NeoCortexApi\NeoCortexApi.csproj" />
     <ProjectReference Include="..\NeoCortexArrayLib\NeoCortexArrayLib.csproj" />
     <ProjectReference Include="..\NeoCortexEntities\NeoCortexEntities.csproj" />
     <ProjectReference Include="..\WebSocketNeuroVisualizer\WebSocketNeuroVisualizer.csproj" />
     <ProjectReference Include="..\Project\MySolution\MySolution\MyProject.csproj" />
+    <ProjectReference Include="..\Samples\NeoCortexApiSample\NeoCortexApiSample.csproj" />
+    <ProjectReference Include="..\GridCell\GridCell.csproj" />
+    <ProjectReference Include="..\HtmActorHost\HtmActorHost.csproj" />
+    <ProjectReference Include="..\ImageEncoder\HtmImageEncoder.csproj" />
+    <ProjectReference Include="..\NeoCortexApi\NeoCortexApi.csproj" />
+    <ProjectReference Include="..\Samples\NeoCortexApiAnomaly\NeoCortexApiAnomaly.csproj" />
+    <ProjectReference Include="..\NeocortexApiLLMSample\NeocortexApiLLMSample.csproj" />
+    <ProjectReference Include="..\Samples\NeoCortexApiPersistenceSample\NeoCortexApiPersistenceSample.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="MnistPng28x28\testing\3\1020.png">

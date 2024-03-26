@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NeoCortex;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Utility;

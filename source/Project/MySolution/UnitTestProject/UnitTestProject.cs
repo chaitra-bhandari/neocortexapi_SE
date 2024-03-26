@@ -1,4 +1,6 @@
-﻿namespace NeoCortexApiSample;
+﻿using Microsoft.VisualStudio.TestPlatform.TestHost;
+namespace NeoCortexApiSample;
+
 
 [TestClass]
 public class LanguageSemantic
@@ -171,10 +173,12 @@ public class LanguageSemantic
 
             Program.PredictNextElement(predictor, testingData);
 
-            
+
             Program.PredictNextElement(predictor, asciiVal);
 
             Assert.IsNotNull(predictor);
             }
         }
     }
+
+
