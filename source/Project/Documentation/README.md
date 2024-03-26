@@ -152,7 +152,7 @@ double accuracy = ( 1 - leastBCE)* 100.0;
 Console.WriteLine($"Accuracy: {accuracy * 100}%");
                          
 ```
-For the complete code for calculating binary cross entropy, refer to the [CalculateBinaryCrossEntropy()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/RunLanguageSemanticExperiment.cs) and [CalculateCorrectness()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/RunLanguageSemanticExperiment.cs) methods implemented in the MultiSequenceLearning.
+For the complete code for calculating binary cross entropy, refer to the [CalculateBinaryCrossEntropy()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/MySolution/MultiSequenceLearning.cs) and [CalculateCorrectness()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/MySolution/MultiSequenceLearning.cs) methods implemented in the MultiSequenceLearning.
 
 ### 6. Implement the code for prediction (inference).
 The user's input or test data from a text file is passed to the predictor, which utilizes the PredictNextElement method to make predictions.
