@@ -9,8 +9,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\NeoCortexApi\NeoCortexApi.csproj" />
-    <ProjectReference Include="..\..\..\NeoCortexArrayLib\NeoCortexArrayLib.csproj" />
     <ProjectReference Include="..\..\..\Samples\NeoCortexApiSample\NeoCortexApiSample.csproj" />
     <ProjectReference Include="..\..\..\NeoCortexEntities\NeoCortexEntities.csproj" />
+    <ProjectReference Include="..\..\..\NeoCortexArrayLib\NeoCortexArrayLib.csproj" />
   </ItemGroup>
 </Project>

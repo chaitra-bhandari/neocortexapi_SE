@@ -5,7 +5,7 @@
 
 This project aims to implement the application of multi-sequence learning techniques to generate a predicting code based on song or story text that represents the completion engine as used by GPT with prediction accuracy in C#/. NET Core. This project will first explore the existing __RunMultiSequenceLearningExperiment()__, which was implemented in __NeoCortex__ API, a .NET Core library. NeoCortex API is the implementation of Hierarchical Temporal Memory Cortical Learning Algorithm based on Spatial Pooler, Temporal Pooler, various encoders and CorticalNetwork algorithms.
 
-This project implements a new method __RunLanguageSemanticExperiment()__ for learning data from the text file. The data will be divided into two parts. 90% of the data will be used for training and 10% for testing. The model will be trained with the training data first. After learning is completed, the model is tested by testing data from another file to evaluate its prediction accuracy by calculating the percentage of correctly predicted next elements out of the total number of predictions.Additionally,the developed model offers a mechanism for user input for generating text sequences and assessing binary cross-entropy loss during the training phase.
+This project implements a new method __RunLanguageSemanticExperiment()__ for learning data from the text file (long text). The data will be divided into two parts. 90% of the data will be used for training and 10% for testing. The model will be trained with the training data first. After learning is completed, the model is tested by testing data from another file to evaluate its prediction accuracy.
 
 
 # Getting Started
@@ -106,7 +106,7 @@ static List<double> SplitIntoBatches(List<double> inputValues, int batchSize, in
 ```
 
  ### 4. Retrieve the batch of input data from the overlapping sequence
- A list of batches, each containing 8 characters, is passed iteratively to the [Run()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/MySolution/Program.cs) method impelemented in [MultiSequenceLearning](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/MySolution/MultiSequenceLearning.cs) class.
+ A list of batches, each containing 8 characters, is passed iteratively to the [Run()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/Program.cs) method impelemented in [MultiSequenceLearning](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/RunLanguageSemanticExperiment.cs) class.
  ```csharp
  int batch_size = 8;
  int overlap = 4;
@@ -152,7 +152,7 @@ double accuracy = ( 1 - leastBCE)* 100.0;
 Console.WriteLine($"Accuracy: {accuracy * 100}%");
                          
 ```
-For the complete code for calculating binary cross entropy, refer to the [CalculateBinaryCrossEntropy()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/MySolution/MultiSequenceLearning.cs) and [CalculateCorrectness()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/MySolution/MultiSequenceLearning.cs) methods implemented in the MultiSequenceLearning.
+For the complete code for calculating binary cross entropy, refer to the [CalculateBinaryCrossEntropy()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/RunLanguageSemanticExperiment.cs) and [CalculateCorrectness()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/RunLanguageSemanticExperiment.cs) methods implemented in the MultiSequenceLearning.
 
 ### 6. Implement the code for prediction (inference).
 The user's input or test data from a text file is passed to the predictor, which utilizes the PredictNextElement method to make predictions.
@@ -217,10 +217,6 @@ For the complete code for calculating prediction accuracy, refer to the [Predict
 
 
 ## Results
-In this project, various datasets were utilized to test the model, with small dataset sizes and short sequence lengths to accommodate substantial execution time.
-
-![image](https://github.com/chaitra-bhandari/neocortexapi_SE/assets/148901179/58efb8d8-b611-4252-9972-eaefbe3060bd)
-
 
 
 
@@ -278,3 +274,4 @@ In this project, various datasets were utilized to test the model, with small da
 
  
        
+

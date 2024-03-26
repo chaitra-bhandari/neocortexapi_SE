@@ -3,7 +3,6 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,7 +15,7 @@ namespace NeoCortexApiSample
     /// Implements an experiment that demonstrates how to learn sequences.
     /// </summary>
     public class MultiSequenceLearning
-    {
+        {
         /// <summary>
         /// Runs the learning of sequences.
         /// </summary>
@@ -352,5 +351,7 @@ namespace NeoCortexApiSample
 
             return $"{sequence}_{key}";
         }
+
+        
     }
 }
