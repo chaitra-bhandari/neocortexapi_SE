@@ -106,7 +106,7 @@ static List<double> SplitIntoBatches(List<double> inputValues, int batchSize, in
 ```
 
  ### 4. Retrieve the batch of input data from the overlapping sequence
- A list of batches, each containing 8 characters, is passed iteratively to the [Run()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/Program.cs) method impelemented in [MultiSequenceLearning](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/RunLanguageSemanticExperiment.cs) class.
+ A list of batches, each containing 8 characters, is passed iteratively to the [Run()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/MySolution/Program.cs) method impelemented in [MultiSequenceLearning](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/MySolution/MultiSequenceLearning.cs) class.
  ```csharp
  int batch_size = 8;
  int overlap = 4;
