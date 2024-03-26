@@ -63,11 +63,11 @@ public class LanguageSemantic
 
 
     //<summary>
-    //Test case to check predicted output and accuracy, by using "trainData.txt" and user input as string.
+    //Test case to check predicted output and accuracy, by using "trainData1.txt" and user input as string. wihout testdata text file
     /// </summary>
     [TestMethod]
     [DataRow(@"trainData1.txt")]
-    public void Predictor_PredictNextElement_ForUserInput(string filePathToTrainingData)
+    public void Predictor_PredictNextElement_ForInput(string filePathToTrainingData)
 
         {
 
@@ -119,11 +119,11 @@ public class LanguageSemantic
         }
 
     //<summary>
-    //Test case to check predicted output and accuracy, by using "trainData.txt" and user input as string.
-    /// </summary>
+    //Test case to check predicted output and accuracy, by using "trainData1.txt" and ""rainData1.txt as string.
+    ///</summary>
     [TestMethod]
     [DataRow(@"trainData1.txt", @"testData1.txt")]
-    public void Predictor_PredictNextElement_ForInput(string filePathToTrainingData, string filePathToTestData)
+    public void Predictor_PredictNextElement_ForUserInput(string filePathToTrainingData, string filePathToTestData)
 
         {
 
@@ -171,9 +171,7 @@ public class LanguageSemantic
 
             Program.PredictNextElement(predictor, testingData);
 
-            // Assert
-            Assert.IsNotNull(predictor);
-
+            
             Program.PredictNextElement(predictor, asciiVal);
 
             Assert.IsNotNull(predictor);
