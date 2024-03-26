@@ -217,6 +217,10 @@ For the complete code for calculating prediction accuracy, refer to the [Predict
 
 
 ## Results
+In this project, various datasets were utilized to test the model, with small dataset sizes and short sequence lengths to accommodate substantial execution time.
+
+![image](https://github.com/chaitra-bhandari/neocortexapi_SE/assets/148901179/58efb8d8-b611-4252-9972-eaefbe3060bd)
+
 
 
 
