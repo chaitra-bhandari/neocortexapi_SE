@@ -17,7 +17,7 @@ namespace NeoCortexApiSample
     /// <summary>
     /// Implements an experiment that demonstrates how to learn sequences.
     /// </summary>
-    public class MultiSequenceLearning
+    public class RunLanguagrSemantic
         {
         /// <summary>
         /// Runs the learning of sequences.
@@ -25,7 +25,7 @@ namespace NeoCortexApiSample
         /// <param name="inputValues">List of sequences</param>
         public Predictor Run(List<double> inputValues)
             {
-            Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
+            Debug.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
 
             int inputBits = 100;
             int numColumns = 1024;
@@ -95,6 +95,8 @@ namespace NeoCortexApiSample
             CortexLayer<object, object> layer1 = new CortexLayer<object, object>("L1");
 
             TemporalMemory tm = new TemporalMemory();
+
+            double accuracyFromBinaryCrossEntropy = 0.0;
 
             // For more information see following paper: https://www.scitepress.org/Papers/2021/103142/103142.pdf
             HomeostaticPlasticityController hpc = new HomeostaticPlasticityController(mem, numUniqueInputs * 150, (isStable, numPatterns, actColAvg, seenInputs) =>
@@ -219,7 +221,7 @@ namespace NeoCortexApiSample
 
                             continue;
 
-                        
+
                         string key = GetKey(previousInputs, input);
 
                         List<Cell> actCells;
@@ -350,7 +352,7 @@ namespace NeoCortexApiSample
                     /// <summary>
                     /// Calculate Binary Cross Entropy loss
                     /// Sum up the binary cross-entropy values for each prediction (0 for correct predictions, 1 for incorrect predictions)
-                    /// Then divide total bce by the total number of predictions.
+                    /// Then divide total bce by the total number of correctness counts.
                     /// </summary>
                     /// <param name="correctness"> difference between active SDR values and predcted values </param>
                     /// <returns>val of type double </returns>
@@ -369,9 +371,9 @@ namespace NeoCortexApiSample
                     double aveBCE = totalBCE / cycle;
 
                     //Accuracy from binary cross entropy
-                    double accuracyFromBinaryCrossEntropy = (1 - aveBCE) * 100.0;
+                    accuracyFromBinaryCrossEntropy = (1 - aveBCE) * 100.0;
 
-                    Debug.WriteLine($"accuracyFromBinaryCrossEntropy  {accuracyFromBinaryCrossEntropy}%");
+                    Debug.WriteLine($" \t accuracyFromBinaryCrossEntropy  {accuracyFromBinaryCrossEntropy.ToString("0.00")}% \t");
 
                     // The first element (a single element) in the sequence cannot be predicted
                     double maxPossibleAccuraccy = (double)((double)inputValues.Count - 1) / (double)inputValues.Count * 100.0;
@@ -379,7 +381,7 @@ namespace NeoCortexApiSample
                     //double accuracy = (double)matches / (double)inputValues.Count * 100.0;
 
 
-                    Debug.WriteLine($"Cycle: {cycle} tMatches={matches} of {inputValues.Count()} t {maxPossibleAccuraccy}%");
+                    Debug.WriteLine($"Cycle: {cycle} tMatches={matches} of {inputValues.Count()} \t {accuracyFromBinaryCrossEntropy.ToString("0.00")}%\"");
 
                     if (accuracyFromBinaryCrossEntropy >= maxPossibleAccuraccy)
                         {
@@ -391,14 +393,14 @@ namespace NeoCortexApiSample
                         if (maxMatchCnt >= 30)
                             {
                             sw.Stop();
-                            Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracyFromBinaryCrossEntropy} of maximum possible {maxMatchCnt}. Elapsed sequence {inputValues} learning time: {sw.Elapsed}.");
+                            Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracyFromBinaryCrossEntropy.ToString("0.00")}% of maximum possible {maxMatchCnt}. Elapsed sequence {inputValues} learning time: {sw.Elapsed}.");
                             isLearningCompleted = true;
                             break;
                             }
                         }
                     else if (maxMatchCnt > 0)
                         {
-                        Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracyFromBinaryCrossEntropy}. This indicates instable state. Learning will be continued.");
+                        Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracyFromBinaryCrossEntropy.ToString("0.00")}%. This indicates instable state. Learning will be continued.");
                         maxMatchCnt = 0;
                         }
 
@@ -411,7 +413,15 @@ namespace NeoCortexApiSample
 
                 }
 
+
             Debug.WriteLine("------------ END ------------");
+
+            Console.Write("------------------------------------------------------------------------------------------");
+
+            Console.WriteLine($" \n accuracyFromBinaryCrossEntropy  {accuracyFromBinaryCrossEntropy.ToString("0.00")}% \t");
+
+
+
 
             return new Predictor(layer1, mem, cls);
             }

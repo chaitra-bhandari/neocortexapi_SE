@@ -21,5 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\MySolution\MyProject.csproj" />
     <ProjectReference Include="..\..\..\NeoCortexApi\NeoCortexApi.csproj" />
+    <ProjectReference Include="..\..\..\Samples\NeoCortexApiSample\NeoCortexApiSample.csproj" />
   </ItemGroup>
 </Project>

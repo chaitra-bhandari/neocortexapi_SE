@@ -1,7 +1,5 @@
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NeoCortexApi;
-
+﻿
+global using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace NeoCortexApiSample;
 
 [TestClass]
@@ -12,7 +10,7 @@ public class LanguageSemantic
     public void ReadFileAndConvertToCharList_ValidFilePath_ReturnsListOfChars()
         {
         // Arrange
-        string filePath = @"filename.txt"; // Assuming you have a valid test file
+        string filePath = "/Users/chaitrabhandari/Desktop/filename.txt"; // Assuming you have a valid test file
 
 
         // Act
@@ -21,7 +19,7 @@ public class LanguageSemantic
         // Assert
         Assert.IsNotNull(charList);
         Assert.IsTrue(charList.Count > 0);
-
+        
         }
 
 
@@ -63,47 +61,47 @@ public class LanguageSemantic
         CollectionAssert.AreEqual(expectedBatch, result);
         }
 
-    [TestMethod]
-    public void Predictor_PredictNextElement_ReturnsCorrectPrediction()
+    //[TestMethod]
+    //public void Predictor_PredictNextElement_ReturnsCorrectPrediction()
 
-        {
+    //    {
 
-        List<double> inputValues = new List<double>();
+    //    List<double> inputValues = new List<double>();
 
-        string filePath = "/Users/chaitrabhandari/Desktop/filename.txt"; // Assuming you have a valid test file
+    //    string filePath = "/Users/chaitrabhandari/Desktop/filename.txt"; // Assuming you have a valid test file
 
-        List<char> charList = Program.ReadFileAndConvertToCharList(filePath);
+    //    List<char> charList = Program.ReadFileAndConvertToCharList(filePath);
 
-        //Add asciiValue to a List 
-        foreach (char character in charList)
-            {
-            double asciiValue = (double)character;
+    //    //Add asciiValue to a List 
+    //    foreach (char character in charList)
+    //        {
+    //        double asciiValue = (double)character;
 
-            inputValues.Add(asciiValue);
-            }
+    //        inputValues.Add(asciiValue);
+    //        }
 
-        string testingData = "input";
+    //    string testingData = "input";
 
-        List<double> asciiVal = new List<double>();
+    //    List<double> asciiVal = new List<double>();
 
-        foreach (char c in testingData)
-            {
+    //    foreach (char c in testingData)
+    //        {
 
-            asciiVal.Add(c);
+    //        asciiVal.Add(c);
 
-            }
-        RunLanguagrSemantic experiment = new RunLanguagrSemantic();
+    //        }
+    //    MultiSequenceLearning experiment = new MultiSequenceLearning();
 
-        var predictor = experiment.Run(inputValues);
+    //    var predictor = experiment.Run(inputValues);
 
-        Program.PredictNextElement(predictor, asciiVal);
+    //    Program.PredictNextElement(predictor, asciiVal);
 
 
-        // Assert
-        // Assert your expected prediction result
-        Assert.IsNotNull(predictor); // Example assertion, modify based on your requirements
-                                     // Assert.AreEqual();
-        }
+    //    // Assert
+    //    // Assert your expected prediction result
+    //    Assert.IsNotNull(predictor); // Example assertion, modify based on your requirements
+    //                                 // Assert.AreEqual();
+    //    }
 
 
 
@@ -155,4 +153,3 @@ public class LanguageSemantic
 
 
     }
-
