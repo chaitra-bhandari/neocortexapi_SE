@@ -5,7 +5,8 @@
 
 This project aims to implement the application of multi-sequence learning techniques to generate a predicting code based on song or story text that represents the completion engine as used by GPT with prediction accuracy in C#/. NET Core. This project will first explore the existing __RunMultiSequenceLearningExperiment()__, which was implemented in __NeoCortex__ API, a .NET Core library. NeoCortex API is the implementation of Hierarchical Temporal Memory Cortical Learning Algorithm based on Spatial Pooler, Temporal Pooler, various encoders and CorticalNetwork algorithms.
 
-This project implements a new method __RunLanguageSemanticExperiment()__ for learning data from the text file (long text). The data will be divided into two parts. 90% of the data will be used for training and 10% for testing. The model will be trained with the training data first. After learning is completed, the model is tested by testing data from another file to evaluate its prediction accuracy.
+This project implements a new method __RunLanguageSemanticExperiment()__ for learning data from the text file.The data will be divided into two parts. 90% of the data will be used for training and 10% for testing. The model will be trained with the training data first. After learning is completed, the model is tested by testing data from another file to evaluate its prediction accuracy. Additionally,
+the developed system offers a mechanism for user input for generating text sequences and assessing binary cross-entropy loss during the training phase.
 
 
 # Getting Started
@@ -212,11 +213,18 @@ foreach (string part in parts)
               double accuracy = Accuracycalculation(totalMatches, totalPredictions);
               highestaccuracy = GetHighestAccuracyPrediction(accuracy, maxAccuracy, generatedResponse);
 ```
-For the complete code for calculating prediction accuracy, refer to the [PredictNextElement()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/Program.cs) method implemented in the MultiSequenceLearning 
+For complete code refer to the [PredictNextElement()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/Program.cs) method implemented in the MultiSequenceLearning.
 
-
+## Testing
+The path to the unit test [LanguageSemantic.cs()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/UnitTestProject/LanguageSemantic.cs)
 
 ## Results
+In this project, various datasets were utilized to test the model, with small dataset sizes and short sequence lengths to accommodate substantial execution time.
+
+![WhatsApp Image 2024-03-26 at 12 32 32 AM](https://github.com/chaitra-bhandari/neocortexapi_SE/assets/148901178/6c308573-9d50-43f2-8f30-59a34955756f)
+
+## UpdatedFiles
+[HtmClassifier.cs()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/NeoCortexApi/Classifiers/HtmClassifier.cs)
 
 
 
