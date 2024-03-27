@@ -22,7 +22,7 @@ e.g :
 
 
 ### 1.  Processing input data
-Input data processing involves transforming a text file sequence into a list of ASCII characters, achieved by excluding control characters such as \r, \n, \t, etc.
+Input data processing involves transforming a text file sequence into a list of ASCII characters, achieved by excluding control characters such as \r, \n, \t etc.
 ```csharp
       //Path to the learning text file.
       string filePathToTrainingData = @"trainData.txt";
