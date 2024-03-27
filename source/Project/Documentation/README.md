@@ -215,6 +215,9 @@ foreach (string part in parts)
 ```
 For complete code refer to the [PredictNextElement()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/chaitra-bhandari/source/Project/MySolution/MySolution/Program.cs) method implemented in the MultiSequenceLearning.
 
+## UpdatedFiles
+[HtmClassifier.cs()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/NeoCortexApi/Classifiers/HtmClassifier.cs)
+
 ## Testing
 The path to the unit test [LanguageSemantic.cs()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/Project/MySolution/UnitTestProject/LanguageSemantic.cs)
 
@@ -223,8 +226,6 @@ In this project, various datasets were utilized to test the model, with small da
 
 ![WhatsApp Image 2024-03-26 at 12 32 32 AM](https://github.com/chaitra-bhandari/neocortexapi_SE/assets/148901178/6c308573-9d50-43f2-8f30-59a34955756f)
 
-## UpdatedFiles
-[HtmClassifier.cs()](https://github.com/chaitra-bhandari/neocortexapi_SE/blob/SequenTraid/source/NeoCortexApi/Classifiers/HtmClassifier.cs)
 
 
 
